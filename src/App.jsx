@@ -1,14 +1,30 @@
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleBasedRoute from './components/RoleBasedRoute';
+import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
-import HomePage from './pages/HomePage';
+import Placeholder from './pages/Placeholder';
+import AccessDeniedPage from './pages/AccessDeniedPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
     return (
         <Routes>
             <Route path="/login" element={<LoginPage />} />
+
             <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<HomePage />} />
+                <Route element={<Layout />}>
+                    <Route path="/" element={<Placeholder title="Dashboard" />} />
+                    <Route path="/customers" element={<Placeholder title="Customers" />} />
+                    <Route path="/orders" element={<Placeholder title="Orders" />} />
+
+                    <Route element={<RoleBasedRoute roles={['ADMIN']} />}>
+                        <Route path="users" element={<Placeholder title="Users" />} />
+                    </Route>
+
+                    <Route path="/access-denied" element={<AccessDeniedPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                </Route>
             </Route>
         </Routes>
     );

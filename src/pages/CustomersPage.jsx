@@ -40,7 +40,7 @@ function CustomersPage() {
                 });
                 setData(response.data);
             } catch (err) {
-                setError(err.response?.data?.message || 'Не удалось загрузить клиентов');
+                setError(err.response?.data?.message || 'Failed to load customer');
             } finally {
                 setLoading(false);
             }
@@ -67,7 +67,7 @@ function CustomersPage() {
         setDeleteLoading(true);
         try {
             await deleteCustomer(deleting.id);
-            toast.success('Клиент удалён');
+            toast.success('Customer deleted');
             setDeleting(null);
             if (data.content.length === 1 && page > 0) {
                 setPage(page - 1);
@@ -75,7 +75,7 @@ function CustomersPage() {
                 setReloadKey((k) => k + 1);
             }
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Не удалось удалить клиента');
+            toast.error(err.response?.data?.message || 'Failed to delete customer');
             setDeleting(null);
         } finally {
             setDeleteLoading(false);
@@ -83,13 +83,13 @@ function CustomersPage() {
     };
 
     const columns = [
-        { key: 'name', title: 'Имя', sortable: true },
-        { key: 'companyName', title: 'Компания', render: (c) => c.companyName || '—' },
-        { key: 'phone', title: 'Телефон' },
+        { key: 'name', title: 'Name', sortable: true },
+        { key: 'companyName', title: 'Company', render: (c) => c.companyName || '—' },
+        { key: 'phone', title: 'Phone' },
         { key: 'email', title: 'Email', render: (c) => c.email || '—' },
         {
             key: 'createdAt',
-            title: 'Создан',
+            title: 'Created',
             sortable: true,
             render: (c) => c.createdAt.slice(0, 10),
         },
@@ -98,10 +98,10 @@ function CustomersPage() {
             title: '',
             render: (c) => (
                 <div className="row-actions">
-                    <Link to={`/customers/${c.id}/edit`}>Изменить</Link>
+                    <Link to={`/customers/${c.id}/edit`}>Edit</Link>
                     {user?.role === 'ADMIN' && (
                         <button className="link-danger" onClick={() => setDeleting(c)}>
-                            Удалить
+                            Delete
                         </button>
                     )}
                 </div>
@@ -112,14 +112,14 @@ function CustomersPage() {
     return (
         <div>
             <div className="page-header">
-                <h1>Клиенты</h1>
-                <span className="muted">Всего: {data.totalElements}</span>
+                <h1>Customers</h1>
+                <span className="muted">Total: {data.totalElements}</span>
                 <Link to="/customers/new" className="btn push-right">
-                    Добавить клиента
+                    Add customer
                 </Link>
             </div>
 
-            <SearchBar onSearch={handleSearch} placeholder="Имя, email, телефон или компания" />
+            <SearchBar onSearch={handleSearch} placeholder="Name, email, phone or company" />
 
             {error && <div className="form-error">{error}</div>}
 
@@ -133,12 +133,12 @@ function CustomersPage() {
                 page={page}
                 totalPages={data.totalPages}
                 onPageChange={setPage}
-                emptyText="Клиенты не найдены"
+                emptyText="Customers not found"
             />
 
             <ConfirmDialog
                 open={Boolean(deleting)}
-                message={`Удалить клиента «${deleting?.name}»? Это действие нельзя отменить.`}
+                message={`Delete customer «${deleting?.name}»? This action cannot be undone.`}
                 onConfirm={handleDelete}
                 onCancel={() => setDeleting(null)}
                 loading={deleteLoading}

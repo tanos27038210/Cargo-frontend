@@ -42,7 +42,7 @@ function CustomerFormPage() {
                     notes: c.notes || '',
                 });
             } catch (err) {
-                toast.error(err.response?.data?.message || 'Не удалось загрузить клиента');
+                toast.error(err.response?.data?.message || 'Failed to load customer');
                 navigate('/customers', { replace: true });
             } finally {
                 setLoading(false);
@@ -59,30 +59,30 @@ function CustomerFormPage() {
     const validate = () => {
         const e = {};
         if (!form.name.trim()) {
-            e.name = 'Введите имя';
+            e.name = 'Enter name';
         } else if (form.name.trim().length > 150) {
-            e.name = 'Не больше 150 символов';
+            e.name = 'Maximum 150 characters';
         }
         if (form.companyName.trim().length > 150) {
-            e.companyName = 'Не больше 150 символов';
+            e.companyName = 'Maximum 150 characters';
         }
         if (form.email.trim()) {
             if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
-                e.email = 'Неверный формат email';
+                e.email = 'Invalid format email';
             } else if (form.email.trim().length > 100) {
-                e.email = 'Не больше 100 символов';
+                e.email = 'Maximum 100 characters';
             }
         }
         if (!form.phone.trim()) {
-            e.phone = 'Введите телефон';
+            e.phone = 'Enter phone number';
         } else if (!/^[0-9+()\s-]{5,50}$/.test(form.phone.trim())) {
-            e.phone = 'Допустимы цифры, +, (, ), пробел и дефис, от 5 до 50 символов';
+            e.phone = 'Digits, +, (, ), spaces and hyphens allowed, 5 to 50 characters';
         }
         if (form.address.trim().length > 100) {
-            e.address = 'Не больше 100 символов';
+            e.address = 'Maximum 100 characters';
         }
         if (form.notes.trim().length > 250) {
-            e.notes = 'Не больше 250 символов';
+            e.notes = 'Maximum 250 characters';
         }
         return e;
     };
@@ -108,10 +108,10 @@ function CustomerFormPage() {
         try {
             if (isEdit) {
                 await updateCustomer(id, payload);
-                toast.success('Клиент обновлён');
+                toast.success('Customer updated');
             } else {
                 await createCustomer(payload);
-                toast.success('Клиент создан');
+                toast.success('Customer created');
             }
             navigate('/customers');
         } catch (err) {
@@ -123,7 +123,7 @@ function CustomerFormPage() {
                 });
                 setErrors(fieldErrors);
             } else {
-                toast.error(data?.message || 'Не удалось сохранить клиента');
+                toast.error(data?.message || 'Failed to save customer');
             }
         } finally {
             setSaving(false);
@@ -137,23 +137,23 @@ function CustomerFormPage() {
     return (
         <div>
             <div className="page-header">
-                <h1>{isEdit ? 'Изменить клиента' : 'Новый клиент'}</h1>
+                <h1>{isEdit ? 'Update customer' : 'New customer'}</h1>
             </div>
 
             <form className="entity-form" onSubmit={handleSubmit} noValidate>
                 <div className="form-grid">
-                    <FormInput label="Имя" name="name" value={form.name} onChange={handleChange} error={errors.name} required />
-                    <FormInput label="Телефон" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} required />
+                    <FormInput label="Name" name="name" value={form.name} onChange={handleChange} error={errors.name} required />
+                    <FormInput label="Phone" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} required />
                     <FormInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} />
-                    <FormInput label="Компания" name="companyName" value={form.companyName} onChange={handleChange} error={errors.companyName} />
-                    <FormInput label="Адрес" name="address" value={form.address} onChange={handleChange} error={errors.address} />
+                    <FormInput label="Company" name="companyName" value={form.companyName} onChange={handleChange} error={errors.companyName} />
+                    <FormInput label="Address" name="address" value={form.address} onChange={handleChange} error={errors.address} />
                 </div>
                 <FormTextarea label="Заметки" name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
 
                 <div className="form-actions">
                     <Link to="/customers" className="btn secondary">Отмена</Link>
                     <button type="submit" className="btn" disabled={saving}>
-                        {saving ? 'Сохранение...' : 'Сохранить'}
+                        {saving ? 'Saving...' : 'Save'}
                     </button>
                 </div>
             </form>

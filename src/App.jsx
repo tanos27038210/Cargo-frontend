@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import Placeholder from './pages/Placeholder';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import NotFoundPage from './pages/NotFoundPage';
+import CustomersPage from './pages/CustomersPage';
 
 function App() {
     return (
@@ -15,7 +16,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
                     <Route path="/" element={<Placeholder title="Dashboard" />} />
-                    <Route path="/customers" element={<Placeholder title="Customers" />} />
+                    <Route path="/customers" element={<CustomersPage />} />
                     <Route path="/orders" element={<Placeholder title="Orders" />} />
 
                     <Route element={<RoleBasedRoute roles={['ADMIN']} />}>

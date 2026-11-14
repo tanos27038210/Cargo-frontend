@@ -404,3 +404,74 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.filter-panel {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.badge-DRAFT { background: #e5e7eb; color: #374151; }
+.badge-CONFIRMED, .badge-REGISTERED { background: #dbeafe; color: #1d4ed8; }
+.badge-PICKUP_SCHEDULED, .badge-PICKED_UP { background: #e0e7ff; color: #4338ca; }
+.badge-IN_TRANSIT { background: #fef3c7; color: #b45309; }
+.badge-AT_WAREHOUSE, .badge-SORTING_CENTER { background: #ede9fe; color: #6d28d9; }
+.badge-OUT_FOR_DELIVERY { background: #ccfbf1; color: #0f766e; }
+.badge-DELIVERED { background: #dcfce7; color: #15803d; }
+.badge-CANCELLED, .badge-LOST, .badge-DAMAGED { background: #fee2e2; color: #b91c1c; }
+.badge-RETURNED { background: #f3e8d8; color: #92400e; }
+
+.overdue {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.data-table a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}

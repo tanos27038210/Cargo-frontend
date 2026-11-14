@@ -7,6 +7,7 @@ import Placeholder from './pages/Placeholder';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import NotFoundPage from './pages/NotFoundPage';
 import CustomersPage from './pages/CustomersPage';
+import CustomerFormPage from './pages/CustomerFormPage';
 
 function App() {
     return (
@@ -17,6 +18,8 @@ function App() {
                 <Route element={<Layout />}>
                     <Route path="/" element={<Placeholder title="Dashboard" />} />
                     <Route path="/customers" element={<CustomersPage />} />
+                    <Route path="/customers/new" element={<CustomerFormPage />} />
+                    <Route path="/customers/:id/edit" element={<CustomerFormPage />} />
                     <Route path="/orders" element={<Placeholder title="Orders" />} />
 
                     <Route element={<RoleBasedRoute roles={['ADMIN']} />}>

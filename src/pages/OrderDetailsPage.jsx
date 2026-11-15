@@ -93,6 +93,7 @@ function OrderDetailsPage() {
 
     const isAdmin = user.role === 'ADMIN';
     const canModify = isAdmin || order.managerId === user.id;
+    const isFinished = ['DELIVERED', 'CANCELLED'].includes(order.status);
     const allowedStatuses = getAllowedOrderStatuses(order.status, isAdmin);
 
     return (
@@ -101,7 +102,7 @@ function OrderDetailsPage() {
                 <h1>Заказ {order.orderNumber}</h1>
                 <StatusBadge status={order.status} />
                 <div className="push-right header-actions">
-                    {canModify && (
+                    {canModify && !isFinished && (
                         <Link to={`/orders/${order.id}/edit`} className="btn secondary">
                             Изменить
                         </Link>

@@ -10,6 +10,7 @@ import CustomersPage from './pages/CustomersPage';
 import CustomerFormPage from './pages/CustomerFormPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
+import OrderFormPage from './pages/OrderFormPage';
 
 function App() {
     return (
@@ -24,6 +25,8 @@ function App() {
                     <Route path="/customers/:id/edit" element={<CustomerFormPage />} />
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route path="/orders/:id" element={<OrderDetailsPage />} />
+                    <Route path="/orders/new" element={<OrderFormPage />} />
+                    <Route path="/orders/:id/edit" element={<OrderFormPage />} />
 
                     <Route element={<RoleBasedRoute roles={['ADMIN']} />}>
                         <Route path="users" element={<Placeholder title="Users" />} />

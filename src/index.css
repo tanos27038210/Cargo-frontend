@@ -536,3 +536,97 @@ body {
   border-radius: 4px;
   color: #4b5563;
 }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.card-header h2 {
+  margin: 0;
+}
+
+.dialog-wide {
+  width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.link-action {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.message-list {
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.message {
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 10px 14px;
+  max-width: 80%;
+  align-self: flex-start;
+}
+
+.message-own {
+  background: #dbeafe;
+  align-self: flex-end;
+}
+
+.message-meta {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.message-role {
+  font-size: 11px;
+  color: #4b5563;
+  background: #e5e7eb;
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.message-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 14px;
+}
+
+.message-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid #cbd2d9;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.message-form textarea.has-error {
+  border-color: #dc2626;
+}
+
+.message-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}

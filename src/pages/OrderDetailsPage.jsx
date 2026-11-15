@@ -10,6 +10,8 @@ import { formatDateTime } from '../utils/format';
 import ConfirmDialog from '../components/ConfirmDialog';
 import StatusBadge from '../components/StatusBadge';
 import StatusChangeDropdown from '../components/StatusChangeDropdown';
+import ParcelsSection from '../components/ParcelsSection';
+import MessagesSection from '../components/MessagesSection';
 
 function InfoItem({ label, value }) {
     return (
@@ -46,7 +48,7 @@ function OrderDetailsPage() {
                 setOrder(orderResponse.data);
                 setHistory(historyResponse.data);
             } catch (err) {
-                toast.error(getErrorMessage(err, 'Не удалось загрузить заказ'));
+                toast.error(getErrorMessage(err, 'Failed to load order'));
                 navigate('/orders', { replace: true });
             } finally {
                 setLoading(false);
@@ -59,11 +61,11 @@ function OrderDetailsPage() {
         setStatusLoading(true);
         try {
             await changeOrderStatus(id, { newStatus, comment: comment || null });
-            toast.success('Статус изменён');
+            toast.success('Status updated');
             setReloadKey((k) => k + 1);
             return true;
         } catch (err) {
-            toast.error(getErrorMessage(err, 'Не удалось изменить статус'));
+            toast.error(getErrorMessage(err, 'Failed to update status'));
             return false;
         } finally {
             setStatusLoading(false);
@@ -74,10 +76,10 @@ function OrderDetailsPage() {
         setDeleteLoading(true);
         try {
             await deleteOrder(id);
-            toast.success('Заказ удалён');
+            toast.success('Order deleted');
             navigate('/orders', { replace: true });
         } catch (err) {
-            toast.error(getErrorMessage(err, 'Не удалось удалить заказ'));
+            toast.error(getErrorMessage(err, 'Failed to delete order'));
             setConfirmDelete(false);
         } finally {
             setDeleteLoading(false);
@@ -85,7 +87,7 @@ function OrderDetailsPage() {
     };
 
     if (loading) {
-        return <p>Загрузка...</p>;
+        return <p>Loading...</p>;
     }
     if (!order) {
         return null;
@@ -99,43 +101,50 @@ function OrderDetailsPage() {
     return (
         <div>
             <div className="page-header">
-                <h1>Заказ {order.orderNumber}</h1>
+                <h1>Order {order.orderNumber}</h1>
                 <StatusBadge status={order.status} />
                 <div className="push-right header-actions">
                     {canModify && !isFinished && (
                         <Link to={`/orders/${order.id}/edit`} className="btn secondary">
-                            Изменить
+                            Edit
                         </Link>
                     )}
                     {isAdmin && (
                         <button className="btn danger" onClick={() => setConfirmDelete(true)}>
-                            Удалить
+                            Delete
                         </button>
                     )}
                 </div>
             </div>
 
             <section className="card">
-                <h2>Информация</h2>
+                <h2>Details</h2>
                 <div className="details-grid">
-                    <InfoItem label="Клиент" value={order.customerName} />
-                    <InfoItem label="Ответственный менеджер" value={order.managerFullName} />
-                    <InfoItem label="Откуда" value={order.originAddress} />
-                    <InfoItem label="Куда" value={order.destinationAddress} />
+                    <InfoItem label="Customer" value={order.customerName} />
+                    <InfoItem label="Responsible manager" value={order.managerFullName} />
+                    <InfoItem label="From" value={order.originAddress} />
+                    <InfoItem label="To" value={order.destinationAddress} />
                     <InfoItem
-                        label="Тип доставки"
+                        label="Delivery type"
                         value={DELIVERY_TYPE_LABELS[order.deliveryType] || order.deliveryType}
                     />
-                    <InfoItem label="Цена" value={Number(order.price).toFixed(2)} />
-                    <InfoItem label="Ожидаемая дата доставки" value={order.expectedDeliveryDate} />
-                    <InfoItem label="Создан" value={formatDateTime(order.createdAt)} />
-                    <InfoItem label="Обновлён" value={formatDateTime(order.updatedAt)} />
+                    <InfoItem label="Price" value={Number(order.price).toFixed(2)} />
+                    <InfoItem label="Expected delivery date" value={order.expectedDeliveryDate} />
+                    <InfoItem label="Created" value={formatDateTime(order.createdAt)} />
+                    <InfoItem label="Updated" value={formatDateTime(order.updatedAt)} />
                 </div>
-                <InfoItem label="Заметки" value={order.notes} />
+                <InfoItem label="Notes" value={order.notes} />
             </section>
 
+            <ParcelsSection
+                orderId={order.id}
+                canModify={canModify}
+                isAdmin={isAdmin}
+                orderFinished={isFinished}
+            />
+
             <section className="card">
-                <h2>Смена статуса</h2>
+                <h2>Status change</h2>
                 {canModify ? (
                     <StatusChangeDropdown
                         allowedStatuses={allowedStatuses}
@@ -144,25 +153,25 @@ function OrderDetailsPage() {
                     />
                 ) : (
                     <p className="muted">
-                        Менять статус может только ответственный менеджер или администратор.
+                        Only the responsible manager or administrator can change the status.
                     </p>
                 )}
             </section>
 
             <section className="card">
-                <h2>История статусов</h2>
+                <h2>Status history</h2>
                 {history.length === 0 ? (
-                    <p className="muted">Изменений пока не было.</p>
+                    <p className="muted">No changes yet</p>
                 ) : (
                     <div className="table-wrapper">
                         <table className="data-table">
                             <thead>
                             <tr>
-                                <th>Дата</th>
-                                <th>Было</th>
-                                <th>Стало</th>
-                                <th>Кто изменил</th>
-                                <th>Комментарий</th>
+                                <th>Date</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Changed by</th>
+                                <th>Comment</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -181,9 +190,11 @@ function OrderDetailsPage() {
                 )}
             </section>
 
+            <MessagesSection orderId={order.id} canAccess={canModify} />
+
             <ConfirmDialog
                 open={confirmDelete}
-                message={`Удалить заказ ${order.orderNumber} вместе с посылками и сообщениями? Это действие нельзя отменить.`}
+                message={`Delete parcel ${order.orderNumber} with parcels and messages? This action cannot be undone.`}
                 onConfirm={handleDelete}
                 onCancel={() => setConfirmDelete(false)}
                 loading={deleteLoading}

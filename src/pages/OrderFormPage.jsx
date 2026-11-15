@@ -44,13 +44,13 @@ function OrderFormPage() {
                     const o = response.data;
 
                     if (user.role !== 'ADMIN' && o.managerId !== user.id) {
-                        toast.error('Менять можно только свои заказы');
+                        toast.error('You can only modify your own orders.');
                         navigate(`/orders/${id}`, { replace: true });
                         return;
                     }
 
                     if (['DELIVERED', 'CANCELLED'].includes(o.status)) {
-                        toast.error('Завершённый или отменённый заказ изменить нельзя');
+                        toast.error('A completed or cancelled order cannot be modified.');
                         navigate(`/orders/${id}`, { replace: true });
                         return;
                     }
@@ -75,7 +75,7 @@ function OrderFormPage() {
                     setCustomers(response.data.content);
                 }
             } catch (err) {
-                toast.error(getErrorMessage(err, 'Не удалось загрузить данные'));
+                toast.error(getErrorMessage(err, 'Failed to load date'));
                 navigate('/orders', { replace: true });
                 return;
             } finally {
@@ -94,41 +94,41 @@ function OrderFormPage() {
         const e = {};
 
         if (!isEdit && !form.customerId) {
-            e.customerId = 'Выберите клиента';
+            e.customerId = 'Select a customer';
         }
 
         if (!form.originAddress.trim()) {
-            e.originAddress = 'Введите адрес отправления';
+            e.originAddress = 'Enter the origin address';
         } else if (form.originAddress.trim().length > 100) {
-            e.originAddress = 'Не больше 100 символов';
+            e.originAddress = 'Maximum 100 characters';
         }
 
         if (!form.destinationAddress.trim()) {
-            e.destinationAddress = 'Введите адрес назначения';
+            e.destinationAddress = 'Enter the delivery address';
         } else if (form.destinationAddress.trim().length > 100) {
-            e.destinationAddress = 'Не больше 100 символов';
+            e.destinationAddress = 'Maximum 100 characters';
         }
 
         if (!form.deliveryType) {
-            e.deliveryType = 'Выберите тип доставки';
+            e.deliveryType = 'Enter delivery type';
         }
 
         if (form.price === '') {
-            e.price = 'Введите цену';
+            e.price = 'Enter price';
         } else if (Number(form.price) < 0) {
-            e.price = 'Цена не может быть отрицательной';
+            e.price = 'Price cannot be negative';
         } else if (!/^\d{1,8}(\.\d{1,2})?$/.test(form.price)) {
-            e.price = 'До 8 цифр до запятой и до 2 после';
+            e.price = 'Up to 8 digits before the decimal point and up to 2 after';
         }
 
         if (!form.expectedDeliveryDate) {
-            e.expectedDeliveryDate = 'Укажите ожидаемую дату доставки';
+            e.expectedDeliveryDate = 'Enter the expected delivery date';
         } else if (!isEdit && form.expectedDeliveryDate < today) {
-            e.expectedDeliveryDate = 'Дата не может быть в прошлом';
+            e.expectedDeliveryDate = 'The date cannot be in the past';
         }
 
         if (form.notes.trim().length > 250) {
-            e.notes = 'Не больше 250 символов';
+            e.notes = 'Maximum 250 characters';
         }
 
         return e;
@@ -155,11 +155,11 @@ function OrderFormPage() {
         try {
             if (isEdit) {
                 await updateOrder(id, common);
-                toast.success('Заказ обновлён');
+                toast.success('Order updated');
                 navigate(`/orders/${id}`);
             } else {
                 const response = await createOrder({ ...common, customerId: Number(form.customerId) });
-                toast.success('Заказ создан');
+                toast.success('Order created');
                 navigate(`/orders/${response.data.id}`);
             }
         } catch (err) {
@@ -171,7 +171,7 @@ function OrderFormPage() {
                 });
                 setErrors(fieldErrors);
             } else {
-                toast.error(getErrorMessage(err, 'Не удалось сохранить заказ'));
+                toast.error(getErrorMessage(err, 'Failed to save order'));
             }
         } finally {
             setSaving(false);
@@ -197,53 +197,53 @@ function OrderFormPage() {
     return (
         <div>
             <div className="page-header">
-                <h1>{isEdit ? 'Изменить заказ' : 'Новый заказ'}</h1>
+                <h1>{isEdit ? 'Edit order' : 'New order'}</h1>
             </div>
 
             <form className="entity-form" onSubmit={handleSubmit} noValidate>
                 <div className="form-grid">
                     {isEdit ? (
                         <div className="form-field">
-                            <span>Клиент</span>
+                            <span>Customer</span>
                             <div className="readonly-field">{customerName}</div>
                         </div>
                     ) : (
                         <FormSelect
-                            label="Клиент"
+                            label="Customer"
                             name="customerId"
                             value={form.customerId}
                             onChange={handleChange}
                             error={errors.customerId}
                             options={customerOptions}
-                            placeholder="Выберите клиента"
+                            placeholder="Select customer"
                             required
                         />
                     )}
 
                     <FormSelect
-                        label="Тип доставки"
+                        label="Delivery type"
                         name="deliveryType"
                         value={form.deliveryType}
                         onChange={handleChange}
                         error={errors.deliveryType}
                         options={deliveryOptions}
-                        placeholder="Выберите тип"
+                        placeholder="Select a type"
                         required
                     />
 
-                    <FormInput label="Откуда" name="originAddress" value={form.originAddress} onChange={handleChange} error={errors.originAddress} required />
-                    <FormInput label="Куда" name="destinationAddress" value={form.destinationAddress} onChange={handleChange} error={errors.destinationAddress} required />
+                    <FormInput label="From" name="originAddress" value={form.originAddress} onChange={handleChange} error={errors.originAddress} required />
+                    <FormInput label="To" name="destinationAddress" value={form.destinationAddress} onChange={handleChange} error={errors.destinationAddress} required />
 
-                    <FormInput label="Цена" name="price" type="number" value={form.price} onChange={handleChange} error={errors.price} required />
-                    <FormInput label="Ожидаемая дата доставки" name="expectedDeliveryDate" type="date" value={form.expectedDeliveryDate} onChange={handleChange} error={errors.expectedDeliveryDate} required />
+                    <FormInput label="Price" name="price" type="number" value={form.price} onChange={handleChange} error={errors.price} required />
+                    <FormInput label="Expected delivery date" name="expectedDeliveryDate" type="date" value={form.expectedDeliveryDate} onChange={handleChange} error={errors.expectedDeliveryDate} required />
                 </div>
 
-                <FormTextarea label="Заметки" name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
+                <FormTextarea label="Notes" name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
 
                 <div className="form-actions">
                     <Link to={backLink} className="btn secondary">Отмена</Link>
                     <button type="submit" className="btn" disabled={saving}>
-                        {saving ? 'Сохранение...' : 'Сохранить'}
+                        {saving ? 'Saving...' : 'Save'}
                     </button>
                 </div>
             </form>

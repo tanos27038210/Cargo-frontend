@@ -6,7 +6,7 @@ function StatusChangeDropdown({allowedStatuses, onChange, loading}) {
     const [comment, setComment] = useState('');
 
     if (allowedStatuses.length === 0) {
-        return <p className="muted">Из этого статуса переходов нет</p>;
+        return <p className="muted">There are no transitions from this status</p>;
     }
 
     const handleSubmit = async (event) => {
@@ -36,7 +36,7 @@ function StatusChangeDropdown({allowedStatuses, onChange, loading}) {
             </label>
 
             <label className="form-field">
-                <span>Comment (необязательно)</span>
+                <span>Comment (Not required)</span>
                 <input
                     type="text"
                     maxLength={250}

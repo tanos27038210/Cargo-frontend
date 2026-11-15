@@ -9,6 +9,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import CustomersPage from './pages/CustomersPage';
 import CustomerFormPage from './pages/CustomerFormPage';
 import OrdersPage from './pages/OrdersPage';
+import OrderDetailsPage from './pages/OrderDetailsPage';
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
                     <Route path="/customers/new" element={<CustomerFormPage />} />
                     <Route path="/customers/:id/edit" element={<CustomerFormPage />} />
                     <Route path="/orders" element={<OrdersPage />} />
+                    <Route path="/orders/:id" element={<OrderDetailsPage />} />
 
                     <Route element={<RoleBasedRoute roles={['ADMIN']} />}>
                         <Route path="users" element={<Placeholder title="Users" />} />

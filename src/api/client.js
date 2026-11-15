@@ -21,9 +21,7 @@ client.interceptors.response.use(
             localStorage.removeItem('user');
             window.location.href = '/login';
         }
-        if (error.response?.status === 403) {
-            window.location.href = '/access-denied';
-        }
+
         return Promise.reject(error);
     }
 );

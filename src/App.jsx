@@ -12,6 +12,8 @@ import OrdersPage from './pages/OrdersPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import OrderFormPage from './pages/OrderFormPage';
 import DashboardPage from './pages/DashboardPage';
+import UsersPage from './pages/UsersPage';
+import UserFormPage from './pages/UserFormPage';
 
 function App() {
     return (
@@ -30,7 +32,9 @@ function App() {
                     <Route path="/orders/:id/edit" element={<OrderFormPage />} />
 
                     <Route element={<RoleBasedRoute roles={['ADMIN']} />}>
-                        <Route path="users" element={<Placeholder title="Users" />} />
+                        <Route path="/users" element={<UsersPage />} />
+                        <Route path="/users/new" element={<UserFormPage />} />
+                        <Route path="/users/:id/edit" element={<UserFormPage />} />
                     </Route>
 
                     <Route path="/access-denied" element={<AccessDeniedPage />} />

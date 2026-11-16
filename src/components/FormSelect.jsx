@@ -1,4 +1,5 @@
-function FormSelect({ label, name, value, onChange, error, options, placeholder = 'Выберите', required = false }) {
+function FormSelect({ label, name, value, onChange, error, options,
+                        placeholder = 'Выберите', required = false, disabled = false}) {
     return (
         <label className="form-field">
       <span>
@@ -9,6 +10,7 @@ function FormSelect({ label, name, value, onChange, error, options, placeholder 
                 name={name}
                 value={value}
                 onChange={onChange}
+                disabled={disabled}
                 className={error ? 'has-error' : ''}
             >
                 <option value="">{placeholder}</option>

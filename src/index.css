@@ -717,3 +717,13 @@ body {
     grid-template-columns: 120px 1fr 32px;
   }
 }
+
+.badge-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-inactive {
+  background: #fee2e2;
+  color: #b91c1c;
+}

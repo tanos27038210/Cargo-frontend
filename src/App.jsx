@@ -11,6 +11,7 @@ import CustomerFormPage from './pages/CustomerFormPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import OrderFormPage from './pages/OrderFormPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
     return (
@@ -19,7 +20,7 @@ function App() {
 
             <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
-                    <Route path="/" element={<Placeholder title="Dashboard" />} />
+                    <Route path="/" element={<DashboardPage />} />
                     <Route path="/customers" element={<CustomersPage />} />
                     <Route path="/customers/new" element={<CustomerFormPage />} />
                     <Route path="/customers/:id/edit" element={<CustomerFormPage />} />

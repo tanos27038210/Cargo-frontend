@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { createCustomer, getCustomer, updateCustomer } from '../api/customers';
+import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
+import { getErrorMessage } from '../utils/errors';
 import FormInput from '../components/FormInput';
 import FormTextarea from '../components/FormTextarea';
 
@@ -19,6 +21,7 @@ function CustomerFormPage() {
     const isEdit = Boolean(id);
     const navigate = useNavigate();
     const toast = useToast();
+    const { t } = useLanguage();
 
     const [form, setForm] = useState(EMPTY_FORM);
     const [errors, setErrors] = useState({});
@@ -42,7 +45,7 @@ function CustomerFormPage() {
                     notes: c.notes || '',
                 });
             } catch (err) {
-                toast.error(err.response?.data?.message || 'Failed to load customer');
+                toast.error(getErrorMessage(err, t('customerForm.loadError')));
                 navigate('/customers', { replace: true });
             } finally {
                 setLoading(false);
@@ -59,30 +62,30 @@ function CustomerFormPage() {
     const validate = () => {
         const e = {};
         if (!form.name.trim()) {
-            e.name = 'Enter name';
+            e.name = t('customerForm.errNameRequired');
         } else if (form.name.trim().length > 150) {
-            e.name = 'Maximum 150 characters';
+            e.name = t('common.errMax', { max: 150 });
         }
         if (form.companyName.trim().length > 150) {
-            e.companyName = 'Maximum 150 characters';
+            e.companyName = t('common.errMax', { max: 150 });
         }
         if (form.email.trim()) {
             if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
-                e.email = 'Invalid format email';
+                e.email = t('common.errEmail');
             } else if (form.email.trim().length > 100) {
-                e.email = 'Maximum 100 characters';
+                e.email = t('common.errMax', { max: 100 });
             }
         }
         if (!form.phone.trim()) {
-            e.phone = 'Enter phone number';
+            e.phone = t('customerForm.errPhoneRequired');
         } else if (!/^[0-9+()\s-]{5,50}$/.test(form.phone.trim())) {
-            e.phone = 'Digits, +, (, ), spaces and hyphens allowed, 5 to 50 characters';
+            e.phone = t('customerForm.errPhoneFormat');
         }
         if (form.address.trim().length > 100) {
-            e.address = 'Maximum 100 characters';
+            e.address = t('common.errMax', { max: 100 });
         }
         if (form.notes.trim().length > 250) {
-            e.notes = 'Maximum 250 characters';
+            e.notes = t('common.errMax', { max: 250 });
         }
         return e;
     };
@@ -108,10 +111,10 @@ function CustomerFormPage() {
         try {
             if (isEdit) {
                 await updateCustomer(id, payload);
-                toast.success('Customer updated');
+                toast.success(t('customerForm.updatedOk'));
             } else {
                 await createCustomer(payload);
-                toast.success('Customer created');
+                toast.success(t('customerForm.createdOk'));
             }
             navigate('/customers');
         } catch (err) {
@@ -123,7 +126,7 @@ function CustomerFormPage() {
                 });
                 setErrors(fieldErrors);
             } else {
-                toast.error(data?.message || 'Failed to save customer');
+                toast.error(getErrorMessage(err, t('customerForm.saveError')));
             }
         } finally {
             setSaving(false);
@@ -131,29 +134,29 @@ function CustomerFormPage() {
     };
 
     if (loading) {
-        return <p>Загрузка...</p>;
+        return <p>{t('common.loading')}</p>;
     }
 
     return (
         <div>
             <div className="page-header">
-                <h1>{isEdit ? 'Update customer' : 'New customer'}</h1>
+                <h1>{isEdit ? t('customerForm.titleEdit') : t('customerForm.titleNew')}</h1>
             </div>
 
             <form className="entity-form" onSubmit={handleSubmit} noValidate>
                 <div className="form-grid">
-                    <FormInput label="Name" name="name" value={form.name} onChange={handleChange} error={errors.name} required />
-                    <FormInput label="Phone" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} required />
-                    <FormInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} />
-                    <FormInput label="Company" name="companyName" value={form.companyName} onChange={handleChange} error={errors.companyName} />
-                    <FormInput label="Address" name="address" value={form.address} onChange={handleChange} error={errors.address} />
+                    <FormInput label={t('customers.name')} name="name" value={form.name} onChange={handleChange} error={errors.name} required />
+                    <FormInput label={t('customers.phone')} name="phone" value={form.phone} onChange={handleChange} error={errors.phone} required />
+                    <FormInput label={t('customers.email')} name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} />
+                    <FormInput label={t('customers.company')} name="companyName" value={form.companyName} onChange={handleChange} error={errors.companyName} />
+                    <FormInput label={t('customerForm.address')} name="address" value={form.address} onChange={handleChange} error={errors.address} />
                 </div>
-                <FormTextarea label="Notes" name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
+                <FormTextarea label={t('common.notes')} name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
 
                 <div className="form-actions">
-                    <Link to="/customers" className="btn secondary">Отмена</Link>
+                    <Link to="/customers" className="btn secondary">{t('common.cancel')}</Link>
                     <button type="submit" className="btn" disabled={saving}>
-                        {saving ? 'Saving...' : 'Save'}
+                        {saving ? t('common.saving') : t('common.save')}
                     </button>
                 </div>
             </form>

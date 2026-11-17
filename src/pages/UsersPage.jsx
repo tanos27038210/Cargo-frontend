@@ -1,20 +1,21 @@
-import {useEffect, useState} from 'react';
-import {Link} from 'react-router-dom';
-import {getUsers, updateUser} from '../api/users';
-import {useAuth} from '../context/AuthContext';
-import {useToast} from '../context/ToastContext';
-import {ROLE_LABELS} from '../constants/roles';
-import {getErrorMessage} from '../utils/errors';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getUsers, updateUser } from '../api/users';
+import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../context/ToastContext';
+import { getErrorMessage } from '../utils/errors';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
 
 const PAGE_SIZE = 10;
 
 function UsersPage() {
-    const {user: currentUser} = useAuth();
+    const { user: currentUser } = useAuth();
+    const { t } = useLanguage();
     const toast = useToast();
 
-    const [data, setData] = useState({content: [], totalPages: 0, totalElements: 0});
+    const [data, setData] = useState({ content: [], totalPages: 0, totalElements: 0 });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -31,10 +32,10 @@ function UsersPage() {
             setLoading(true);
             setError('');
             try {
-                const response = await getUsers({page, limit: PAGE_SIZE, sortBy, sortDir});
+                const response = await getUsers({ page, limit: PAGE_SIZE, sortBy, sortDir });
                 setData(response.data);
             } catch (err) {
-                setError(getErrorMessage(err, 'Failed to load user'));
+                setError(getErrorMessage(err, t('users.loadError')));
             } finally {
                 setLoading(false);
             }
@@ -61,11 +62,11 @@ function UsersPage() {
                 role: target.role,
                 isActive: active,
             });
-            toast.success(active ? 'User activated' : 'User deactivated');
+            toast.success(active ? t('users.activated') : t('users.deactivated'));
             setDeactivating(null);
             setReloadKey((k) => k + 1);
         } catch (err) {
-            toast.error(getErrorMessage(err, 'Failed to edit user'));
+            toast.error(getErrorMessage(err, t('users.changeError')));
             setDeactivating(null);
         } finally {
             setActionLoading(false);
@@ -73,25 +74,26 @@ function UsersPage() {
     };
 
     const columns = [
-        {key: 'fullName', title: 'Name', sortable: true},
-        {key: 'email', title: 'Email', sortable: true},
+        { key: 'fullName', title: t('users.name'), sortable: true },
+        { key: 'email', title: t('users.email'), sortable: true },
         {
             key: 'role',
-            title: 'Role',
-            render: (u) => ROLE_LABELS[u.role] || u.role,
+            title: t('users.role'),
+            // Подпись роли из словаря по коду (ADMIN, MANAGER)
+            render: (u) => t(`role.${u.role}`),
         },
         {
             key: 'isActive',
-            title: 'Status',
+            title: t('users.status'),
             render: (u) => (
                 <span className={u.isActive ? 'badge badge-active' : 'badge badge-inactive'}>
-          {u.isActive ? 'Active' : 'Deactivated'}
+          {u.isActive ? t('users.active') : t('users.inactive')}
         </span>
             ),
         },
         {
             key: 'createdAt',
-            title: 'Created at',
+            title: t('common.created'),
             sortable: true,
             render: (u) => (u.createdAt ? u.createdAt.slice(0, 10) : '—'),
         },
@@ -99,24 +101,19 @@ function UsersPage() {
             key: 'actions',
             title: '',
             render: (u) => (
-                <div style={{
-                    display: 'flex', justifyContent: 'flex-end', gap: '12px',
-                    alignItems: 'center'
-                }}>
-                    <Link to={`/users/${u.id}/edit`}>Edit</Link>
-                    <div style={{minWidth: '100px', textAlign: 'rigt'}}>
-                        {u.email === currentUser.email ? (
-                            <span className="muted">You</span>
-                        ) : u.isActive ? (
-                            <button className="link-danger" onClick={() => setDeactivating(u)}>
-                                Deactivated
-                            </button>
-                        ) : (
-                            <button className="link-action" onClick={() => changeActive(u, true)}>
-                                Activate
-                            </button>
-                        )}
-                    </div>
+                <div className="row-actions">
+                    <Link to={`/users/${u.id}/edit`}>{t('common.edit')}</Link>
+                    {u.email === currentUser.email ? (
+                        <span className="muted">{t('users.you')}</span>
+                    ) : u.isActive ? (
+                        <button className="link-danger" onClick={() => setDeactivating(u)}>
+                            {t('users.deactivate')}
+                        </button>
+                    ) : (
+                        <button className="link-action" onClick={() => changeActive(u, true)}>
+                            {t('users.activate')}
+                        </button>
+                    )}
                 </div>
             ),
         },
@@ -125,10 +122,10 @@ function UsersPage() {
     return (
         <div>
             <div className="page-header">
-                <h1>Users</h1>
-                <span className="muted">Total: {data.totalElements}</span>
+                <h1>{t('users.title')}</h1>
+                <span className="muted">{t('common.total', { count: data.totalElements })}</span>
                 <Link to="/users/new" className="btn push-right">
-                    Add user
+                    {t('users.add')}
                 </Link>
             </div>
 
@@ -144,14 +141,14 @@ function UsersPage() {
                 page={page}
                 totalPages={data.totalPages}
                 onPageChange={setPage}
-                emptyText="User not found"
+                emptyText={t('users.empty')}
             />
 
             <ConfirmDialog
                 open={Boolean(deactivating)}
-                title="Deactivate user"
-                confirmText="Deactivated"
-                message={`Deactivated «${deactivating?.fullName}»? He will no longer be able to log in until you activate him.`}
+                title={t('users.deactivateTitle')}
+                confirmText={t('users.deactivate')}
+                message={t('users.deactivateMessage', { name: deactivating?.fullName ?? '' })}
                 onConfirm={() => changeActive(deactivating, false)}
                 onCancel={() => setDeactivating(null)}
                 loading={actionLoading}

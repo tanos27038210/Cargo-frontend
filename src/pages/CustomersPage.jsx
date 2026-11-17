@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { deleteCustomer, getCustomers } from '../api/customers';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
+import { getErrorMessage } from '../utils/errors';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
 import SearchBar from '../components/SearchBar';
@@ -11,6 +13,7 @@ const PAGE_SIZE = 10;
 
 function CustomersPage() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const toast = useToast();
 
     const [data, setData] = useState({ content: [], totalPages: 0, totalElements: 0 });
@@ -40,7 +43,7 @@ function CustomersPage() {
                 });
                 setData(response.data);
             } catch (err) {
-                setError(err.response?.data?.message || 'Failed to load customer');
+                setError(getErrorMessage(err, t('customers.loadError')));
             } finally {
                 setLoading(false);
             }
@@ -67,7 +70,7 @@ function CustomersPage() {
         setDeleteLoading(true);
         try {
             await deleteCustomer(deleting.id);
-            toast.success('Customer deleted');
+            toast.success(t('customers.deleted'));
             setDeleting(null);
             if (data.content.length === 1 && page > 0) {
                 setPage(page - 1);
@@ -75,7 +78,7 @@ function CustomersPage() {
                 setReloadKey((k) => k + 1);
             }
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to delete customer');
+            toast.error(getErrorMessage(err, t('customers.deleteError')));
             setDeleting(null);
         } finally {
             setDeleteLoading(false);
@@ -83,13 +86,18 @@ function CustomersPage() {
     };
 
     const columns = [
-        { key: 'name', title: 'Name', sortable: true, render: (c) => <Link to={`/customers/${c.id}`}>{c.name}</Link>, },
-        { key: 'companyName', title: 'Company', render: (c) => c.companyName || '—' },
-        { key: 'phone', title: 'Phone' },
-        { key: 'email', title: 'Email', render: (c) => c.email || '—' },
+        {
+            key: 'name',
+            title: t('customers.name'),
+            sortable: true,
+            render: (c) => <Link to={`/customers/${c.id}`}>{c.name}</Link>,
+        },
+        { key: 'companyName', title: t('customers.company'), render: (c) => c.companyName || '—' },
+        { key: 'phone', title: t('customers.phone') },
+        { key: 'email', title: t('customers.email'), render: (c) => c.email || '—' },
         {
             key: 'createdAt',
-            title: 'Created',
+            title: t('common.created'),
             sortable: true,
             render: (c) => c.createdAt.slice(0, 10),
         },
@@ -98,10 +106,10 @@ function CustomersPage() {
             title: '',
             render: (c) => (
                 <div className="row-actions">
-                    <Link to={`/customers/${c.id}/edit`}>Edit</Link>
+                    <Link to={`/customers/${c.id}/edit`}>{t('common.edit')}</Link>
                     {user?.role === 'ADMIN' && (
                         <button className="link-danger" onClick={() => setDeleting(c)}>
-                            Delete
+                            {t('common.delete')}
                         </button>
                     )}
                 </div>
@@ -112,14 +120,14 @@ function CustomersPage() {
     return (
         <div>
             <div className="page-header">
-                <h1>Customers</h1>
-                <span className="muted">Total: {data.totalElements}</span>
+                <h1>{t('customers.title')}</h1>
+                <span className="muted">{t('common.total', { count: data.totalElements })}</span>
                 <Link to="/customers/new" className="btn push-right">
-                    Add customer
+                    {t('customers.add')}
                 </Link>
             </div>
 
-            <SearchBar onSearch={handleSearch} placeholder="Name, email, phone or company" />
+            <SearchBar onSearch={handleSearch} placeholder={t('customers.searchPlaceholder')} />
 
             {error && <div className="form-error">{error}</div>}
 
@@ -133,12 +141,12 @@ function CustomersPage() {
                 page={page}
                 totalPages={data.totalPages}
                 onPageChange={setPage}
-                emptyText="Customers not found"
+                emptyText={t('customers.empty')}
             />
 
             <ConfirmDialog
                 open={Boolean(deleting)}
-                message={`Delete customer «${deleting?.name}»? This action cannot be undone.`}
+                message={t('customers.deleteMessage', { name: deleting?.name ?? '' })}
                 onConfirm={handleDelete}
                 onCancel={() => setDeleting(null)}
                 loading={deleteLoading}

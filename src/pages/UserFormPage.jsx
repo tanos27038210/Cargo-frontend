@@ -2,18 +2,21 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { createUser, getUser, updateUser } from '../api/users';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
-import { ROLE_LABELS } from '../constants/roles';
 import { getErrorMessage } from '../utils/errors';
 import FormInput from '../components/FormInput';
 import FormSelect from '../components/FormSelect';
 
 const EMPTY_FORM = { fullName: '', email: '', password: '', role: '', isActive: true };
 
+const ROLES = ['ADMIN', 'MANAGER'];
+
 function UserFormPage() {
     const { id } = useParams();
     const isEdit = Boolean(id);
     const { user: currentUser } = useAuth();
+    const { t } = useLanguage();
     const toast = useToast();
     const navigate = useNavigate();
 
@@ -40,7 +43,7 @@ function UserFormPage() {
                 });
                 setIsSelf(u.email === currentUser.email);
             } catch (err) {
-                toast.error(getErrorMessage(err, 'Failed to load user'));
+                toast.error(getErrorMessage(err, t('userForm.loadError')));
                 navigate('/users', { replace: true });
             } finally {
                 setLoading(false);
@@ -58,31 +61,31 @@ function UserFormPage() {
         const e = {};
 
         if (!form.fullName.trim()) {
-            e.fullName = 'Enter name';
+            e.fullName = t('userForm.errNameRequired');
         } else if (form.fullName.trim().length > 100) {
-            e.fullName = 'Maximum 100 characters';
+            e.fullName = t('common.errMax', { max: 100 });
         }
 
         if (!form.email.trim()) {
-            e.email = 'Enter email';
+            e.email = t('userForm.errEmailRequired');
         } else if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
-            e.email = 'Invalid format email';
+            e.email = t('common.errEmail');
         } else if (form.email.trim().length > 150) {
-            e.email = 'Maximum 150 characters';
+            e.email = t('common.errMax', { max: 150 });
         }
 
         if (!isEdit) {
             if (!form.password) {
-                e.password = 'Enter password';
+                e.password = t('userForm.errPasswordRequired');
             } else if (form.password.length < 8) {
-                e.password = 'Minimum 8 characters';
+                e.password = t('userForm.errPasswordMin');
             } else if (form.password.length > 72) {
-                e.password = 'Maximum 72 characters';
+                e.password = t('userForm.errPasswordMax');
             }
         }
 
         if (!form.role) {
-            e.role = 'Select role';
+            e.role = t('userForm.errRoleRequired');
         }
 
         return e;
@@ -107,7 +110,7 @@ function UserFormPage() {
                     role: form.role,
                     isActive: form.isActive,
                 });
-                toast.success('User updated');
+                toast.success(t('userForm.updatedOk'));
             } else {
                 await createUser({
                     fullName: form.fullName.trim(),
@@ -115,7 +118,7 @@ function UserFormPage() {
                     password: form.password,
                     role: form.role,
                 });
-                toast.success('User created');
+                toast.success(t('userForm.createdOk'));
             }
             navigate('/users');
         } catch (err) {
@@ -127,9 +130,9 @@ function UserFormPage() {
                 });
                 setErrors(fieldErrors);
             } else if (err.response?.status === 409) {
-                setErrors({ email: data?.message || 'Email already exists' });
+                setErrors({ email: data?.message });
             } else {
-                toast.error(getErrorMessage(err, 'Failed to save user'));
+                toast.error(getErrorMessage(err, t('userForm.saveError')));
             }
         } finally {
             setSaving(false);
@@ -137,37 +140,34 @@ function UserFormPage() {
     };
 
     if (loading) {
-        return <p>Loading...</p>;
+        return <p>{t('common.loading')}</p>;
     }
 
-    const roleOptions = Object.entries(ROLE_LABELS).map(([code, label]) => ({
-        value: code,
-        label,
-    }));
+    const roleOptions = ROLES.map((code) => ({ value: code, label: t(`role.${code}`) }));
 
     return (
         <div>
             <div className="page-header">
-                <h1>{isEdit ? 'Edit user' : 'New user'}</h1>
+                <h1>{isEdit ? t('userForm.titleEdit') : t('userForm.titleNew')}</h1>
             </div>
 
             <form className="entity-form" onSubmit={handleSubmit} noValidate>
                 <div className="form-grid">
-                    <FormInput label="Name" name="fullName" value={form.fullName} onChange={handleChange} error={errors.fullName} required />
-                    <FormInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} required />
+                    <FormInput label={t('users.name')} name="fullName" value={form.fullName} onChange={handleChange} error={errors.fullName} required />
+                    <FormInput label={t('users.email')} name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} required />
 
                     {!isEdit && (
-                        <FormInput label="Password" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} required />
+                        <FormInput label={t('userForm.password')} name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} required />
                     )}
 
                     <FormSelect
-                        label="Role"
+                        label={t('users.role')}
                         name="role"
                         value={form.role}
                         onChange={handleChange}
                         error={errors.role}
                         options={roleOptions}
-                        placeholder="Select role"
+                        placeholder={t('userForm.rolePlaceholder')}
                         disabled={isSelf}
                         required
                     />
@@ -182,18 +182,16 @@ function UserFormPage() {
                             onChange={handleChange}
                             disabled={isSelf}
                         />
-                        Active (can log in)
+                        {t('userForm.activeLabel')}
                     </label>
                 )}
 
-                {isSelf && (
-                    <p className="muted">You cannot change your own role and status.</p>
-                )}
+                {isSelf && <p className="muted">{t('userForm.selfNote')}</p>}
 
                 <div className="form-actions">
-                    <Link to="/users" className="btn secondary">Cancel</Link>
+                    <Link to="/users" className="btn secondary">{t('common.cancel')}</Link>
                     <button type="submit" className="btn" disabled={saving}>
-                        {saving ? 'Saving...' : 'Save'}
+                        {saving ? t('common.saving') : t('common.save')}
                     </button>
                 </div>
             </form>

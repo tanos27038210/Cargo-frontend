@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getCustomer } from '../api/customers';
 import { getOrders } from '../api/orders';
+import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
-import { DELIVERY_TYPE_LABELS } from '../constants/statuses';
 import { getErrorMessage } from '../utils/errors';
-
 import { formatDateTime } from '../utils/format';
 import DataTable from '../components/DataTable';
 import InfoItem from '../components/InfoItem';
@@ -17,6 +16,7 @@ function CustomerDetailsPage() {
     const { id } = useParams();
     const toast = useToast();
     const navigate = useNavigate();
+    const { t } = useLanguage();
 
     const [customer, setCustomer] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ function CustomerDetailsPage() {
                 const response = await getCustomer(id);
                 setCustomer(response.data);
             } catch (err) {
-                toast.error(getErrorMessage(err, 'Failed to load customer'));
+                toast.error(getErrorMessage(err, t('customerDetails.loadError')));
                 navigate('/customers', { replace: true });
             } finally {
                 setLoading(false);
@@ -53,7 +53,7 @@ function CustomerDetailsPage() {
                 });
                 setOrders(response.data);
             } catch (err) {
-                toast.error(getErrorMessage(err, 'Failed to load customer'));
+                toast.error(getErrorMessage(err, t('customerDetails.ordersLoadError')));
             } finally {
                 setOrdersLoading(false);
             }
@@ -62,7 +62,7 @@ function CustomerDetailsPage() {
     }, [id, page]);
 
     if (loading) {
-        return <p>Loading...</p>;
+        return <p>{t('common.loading')}</p>;
     }
     if (!customer) {
         return null;
@@ -71,34 +71,31 @@ function CustomerDetailsPage() {
     const columns = [
         {
             key: 'orderNumber',
-            title: 'Number',
+            title: t('orders.number'),
             render: (o) => <Link to={`/orders/${o.id}`}>{o.orderNumber}</Link>,
         },
         {
             key: 'route',
-            title: 'Route',
-            // Два адреса через стрелку
+            title: t('orders.route'),
             render: (o) => `${o.originAddress} → ${o.destinationAddress}`,
         },
         {
             key: 'deliveryType',
-            title: 'Delivery type',
-            render: (o) => DELIVERY_TYPE_LABELS[o.deliveryType] || o.deliveryType,
+            title: t('orders.delivery'),
+            // Подпись типа доставки берём из словаря по коду
+            render: (o) => t(`deliveryType.${o.deliveryType}`),
         },
         {
             key: 'price',
-            title: 'Price',
+            title: t('orders.price'),
             render: (o) => Number(o.price).toFixed(2),
         },
         {
             key: 'status',
-            title: 'Status',
+            title: t('orders.status'),
             render: (o) => <StatusBadge status={o.status} />,
         },
-        {
-            key: 'expectedDeliveryDate',
-            title: 'Expected',
-        },
+        { key: 'expectedDeliveryDate', title: t('orders.expected') },
     ];
 
     return (
@@ -107,29 +104,29 @@ function CustomerDetailsPage() {
                 <h1>{customer.name}</h1>
                 <div className="push-right header-actions">
                     <Link to={`/orders/new?customerId=${customer.id}`} className="btn">
-                        Create order
+                        {t('customerDetails.createOrder')}
                     </Link>
                     <Link to={`/customers/${customer.id}/edit`} className="btn secondary">
-                        Edit
+                        {t('common.edit')}
                     </Link>
                 </div>
             </div>
 
             <section className="card">
-                <h2>Information</h2>
+                <h2>{t('customerDetails.info')}</h2>
                 <div className="details-grid">
-                    <InfoItem label="Phone number" value={customer.phone} />
-                    <InfoItem label="Email" value={customer.email} />
-                    <InfoItem label="Company" value={customer.companyName} />
-                    <InfoItem label="Address" value={customer.address} />
-                    <InfoItem label="Created at" value={formatDateTime(customer.createdAt)} />
-                    <InfoItem label="Updated at" value={formatDateTime(customer.updatedAt)} />
+                    <InfoItem label={t('customers.phone')} value={customer.phone} />
+                    <InfoItem label={t('customers.email')} value={customer.email} />
+                    <InfoItem label={t('customers.company')} value={customer.companyName} />
+                    <InfoItem label={t('customerForm.address')} value={customer.address} />
+                    <InfoItem label={t('common.created')} value={formatDateTime(customer.createdAt)} />
+                    <InfoItem label={t('common.updated')} value={formatDateTime(customer.updatedAt)} />
                 </div>
-                <InfoItem label="Notes" value={customer.notes} />
+                <InfoItem label={t('common.notes')} value={customer.notes} />
             </section>
 
             <section className="card">
-                <h2>Customer orders ({orders.totalElements})</h2>
+                <h2>{t('customerDetails.orders', { count: orders.totalElements })}</h2>
                 <DataTable
                     columns={columns}
                     rows={orders.content}
@@ -140,7 +137,7 @@ function CustomerDetailsPage() {
                     page={page}
                     totalPages={orders.totalPages}
                     onPageChange={setPage}
-                    emptyText="The customer has no orders yet"
+                    emptyText={t('customerDetails.noOrders')}
                 />
             </section>
         </div>

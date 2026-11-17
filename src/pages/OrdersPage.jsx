@@ -2,31 +2,21 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getOrders } from '../api/orders';
 import { useAuth } from '../context/AuthContext';
-import { DELIVERY_TYPE_LABELS } from '../constants/statuses';
+import { useLanguage } from '../context/LanguageContext';
+import { getErrorMessage } from '../utils/errors';
 import DataTable from '../components/DataTable';
-import OrderFilterPanel from '../components/OrderFilterPanel';
+import OrderFilterPanel, { EMPTY_FILTERS } from '../components/OrderFilterPanel';
 import SearchBar from '../components/SearchBar';
 import StatusBadge from '../components/StatusBadge';
 
 const PAGE_SIZE = 10;
 const FINISHED = ['DELIVERED', 'CANCELLED'];
 
-const EMPTY_FILTERS = {
-    status: '',
-    deliveryType: '',
-    priceMin: '',
-    priceMax: '',
-    expectedFrom: '',
-    expectedTo: '',
-    createdFrom: '',
-    createdTo: '',
-    mine: false,
-};
-
 const emptyToUndefined = (value) => (value === '' ? undefined : value);
 
 function OrdersPage() {
     const { user } = useAuth();
+    const { t } = useLanguage();
 
     const [data, setData] = useState({ content: [], totalPages: 0, totalElements: 0 });
     const [loading, setLoading] = useState(false);
@@ -61,7 +51,7 @@ function OrdersPage() {
                 });
                 setData(response.data);
             } catch (err) {
-                setError(err.response?.data?.message || 'Failed to load orders');
+                setError(getErrorMessage(err, t('orders.loadError')));
             } finally {
                 setLoading(false);
             }
@@ -94,45 +84,45 @@ function OrdersPage() {
     const columns = [
         {
             key: 'orderNumber',
-            title: 'Number',
+            title: t('orders.number'),
             render: (o) => <Link to={`/orders/${o.id}`}>{o.orderNumber}</Link>,
         },
-        { key: 'customerName', title: 'Customer' },
+        { key: 'customerName', title: t('orders.customer') },
         {
             key: 'route',
-            title: 'Route',
+            title: t('orders.route'),
             render: (o) => `${o.originAddress} → ${o.destinationAddress}`,
         },
         {
             key: 'deliveryType',
-            title: 'Delivery type',
-            render: (o) => DELIVERY_TYPE_LABELS[o.deliveryType] || o.deliveryType,
+            title: t('orders.delivery'),
+            render: (o) => t(`deliveryType.${o.deliveryType}`),
         },
         {
             key: 'price',
-            title: 'Price',
+            title: t('orders.price'),
             sortable: true,
             render: (o) => Number(o.price).toFixed(2),
         },
         {
             key: 'status',
-            title: 'Status',
+            title: t('orders.status'),
             sortable: true,
             render: (o) => <StatusBadge status={o.status} />,
         },
         {
             key: 'expectedDeliveryDate',
-            title: 'Expected',
+            title: t('orders.expected'),
             sortable: true,
             render: (o) => {
                 const overdue = o.expectedDeliveryDate < today && !FINISHED.includes(o.status);
                 return <span className={overdue ? 'overdue' : ''}>{o.expectedDeliveryDate}</span>;
             },
         },
-        { key: 'managerFullName', title: 'Manager' },
+        { key: 'managerFullName', title: t('orders.manager') },
         {
             key: 'createdAt',
-            title: 'Created at',
+            title: t('common.created'),
             sortable: true,
             render: (o) => o.createdAt.slice(0, 10),
         },
@@ -141,12 +131,12 @@ function OrdersPage() {
     return (
         <div>
             <div className="page-header">
-                <h1>Orders</h1>
-                <span className="muted">Total: {data.totalElements}</span>
-                <Link to="/orders/new" className="btn push-right">Create order</Link>
+                <h1>{t('orders.title')}</h1>
+                <span className="muted">{t('common.total', { count: data.totalElements })}</span>
+                <Link to="/orders/new" className="btn push-right">{t('orders.create')}</Link>
             </div>
 
-            <SearchBar onSearch={handleSearch} placeholder="Order number, client, city or package tracking number" />
+            <SearchBar onSearch={handleSearch} placeholder={t('orders.searchPlaceholder')} />
 
             <OrderFilterPanel onApply={handleApplyFilters} />
 
@@ -162,7 +152,7 @@ function OrdersPage() {
                 page={page}
                 totalPages={data.totalPages}
                 onPageChange={setPage}
-                emptyText="Orders not found"
+                emptyText={t('orders.empty')}
             />
         </div>
     );

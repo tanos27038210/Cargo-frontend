@@ -79,7 +79,6 @@ function UsersPage() {
         {
             key: 'role',
             title: t('users.role'),
-            // Подпись роли из словаря по коду (ADMIN, MANAGER)
             render: (u) => t(`role.${u.role}`),
         },
         {

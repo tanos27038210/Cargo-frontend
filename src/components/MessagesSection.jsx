@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createMessage, getMessages } from '../api/messages';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
-import { ROLE_LABELS } from '../constants/roles';
 import { getErrorMessage } from '../utils/errors';
 import { formatDateTime } from '../utils/format';
 
@@ -10,6 +10,7 @@ const MAX_LENGTH = 1000;
 
 function MessagesSection({ orderId, canAccess }) {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const toast = useToast();
 
     const [messages, setMessages] = useState([]);
@@ -30,7 +31,7 @@ function MessagesSection({ orderId, canAccess }) {
                 const response = await getMessages(orderId);
                 setMessages(response.data);
             } catch (err) {
-                toast.error(getErrorMessage(err, 'Failed to load message'));
+                toast.error(getErrorMessage(err, t('messages.loadError')));
             } finally {
                 setLoading(false);
             }
@@ -48,7 +49,7 @@ function MessagesSection({ orderId, canAccess }) {
         event.preventDefault();
         const trimmed = text.trim();
         if (!trimmed) {
-            setError('Enter text message');
+            setError(t('messages.errEmpty'));
             return;
         }
 
@@ -63,7 +64,7 @@ function MessagesSection({ orderId, canAccess }) {
             if (fieldError) {
                 setError(fieldError.message);
             } else {
-                toast.error(getErrorMessage(err, 'Failed to send message'));
+                toast.error(getErrorMessage(err, t('messages.sendError')));
             }
         } finally {
             setSending(false);
@@ -73,10 +74,8 @@ function MessagesSection({ orderId, canAccess }) {
     if (!canAccess) {
         return (
             <section className="card">
-                <h2>Messages</h2>
-                <p className="muted">
-                    Order messages are available to the assigned manager and administrator.
-                </p>
+                <h2>{t('messages.title', { count: 0 })}</h2>
+                <p className="muted">{t('messages.noAccess')}</p>
             </section>
         );
     }
@@ -84,16 +83,16 @@ function MessagesSection({ orderId, canAccess }) {
     return (
         <section className="card">
             <div className="card-header">
-                <h2>Messages ({messages.length})</h2>
+                <h2>{t('messages.title', { count: messages.length })}</h2>
                 <button className="btn secondary" onClick={() => setReloadKey((k) => k + 1)}>
-                    Update
+                    {t('common.refresh')}
                 </button>
             </div>
 
             <div className="message-list" ref={listRef}>
-                {loading && <p className="muted">Loading...</p>}
+                {loading && <p className="muted">{t('common.loading')}</p>}
                 {!loading && messages.length === 0 && (
-                    <p className="muted">No messages yet. Write the first one.</p>
+                    <p className="muted">{t('messages.empty')}</p>
                 )}
                 {messages.map((m) => (
                     <div
@@ -102,7 +101,7 @@ function MessagesSection({ orderId, canAccess }) {
                     >
                         <div className="message-meta">
                             <strong>{m.authorName}</strong>
-                            <span className="message-role">{ROLE_LABELS[m.authorRole] || m.authorRole}</span>
+                            <span className="message-role">{t(`role.${m.authorRole}`)}</span>
                             <span className="muted">{formatDateTime(m.createdAt)}</span>
                         </div>
                         <div className="message-text">{m.text}</div>
@@ -115,14 +114,14 @@ function MessagesSection({ orderId, canAccess }) {
             rows={3}
             maxLength={MAX_LENGTH}
             value={text}
-            placeholder="Enter message"
+            placeholder={t('messages.placeholder')}
             onChange={(e) => setText(e.target.value)}
             className={error ? 'has-error' : ''}
         />
                 <div className="message-form-footer">
                     <span className="muted">{text.length} / {MAX_LENGTH}</span>
                     <button type="submit" className="btn" disabled={sending}>
-                        {sending ? 'Sending...' : 'Send'}
+                        {sending ? t('messages.sending') : t('messages.send')}
                     </button>
                 </div>
                 {error && <span className="field-error">{error}</span>}

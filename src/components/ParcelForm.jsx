@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createParcel, updateParcel } from '../api/parcels';
+import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../utils/errors';
 import FormInput from './FormInput';
@@ -30,23 +31,11 @@ function toForm(parcel) {
     };
 }
 
-function validateDimension(value) {
-    if (value === '') {
-        return '';
-    }
-    if (Number(value) <= 0) {
-        return 'The value must be greater than zero.';
-    }
-    if (!DIMENSION_PATTERN.test(value)) {
-        return 'Up to 6 digits before the decimal point and up to 2 after.';
-    }
-    return '';
-}
-
 const toNumberOrNull = (value) => (value === '' ? null : Number(value));
 
 function ParcelForm({ orderId, parcel, onSaved, onCancel }) {
     const isEdit = Boolean(parcel);
+    const { t } = useLanguage();
     const toast = useToast();
 
     const [form, setForm] = useState(() => toForm(parcel));
@@ -58,21 +47,34 @@ function ParcelForm({ orderId, parcel, onSaved, onCancel }) {
         setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
+    const validateDimension = (value) => {
+        if (value === '') {
+            return '';
+        }
+        if (Number(value) <= 0) {
+            return t('parcelForm.errPositive');
+        }
+        if (!DIMENSION_PATTERN.test(value)) {
+            return t('parcelForm.errDigits6');
+        }
+        return '';
+    };
+
     const validate = () => {
         const e = {};
 
         if (!form.description.trim()) {
-            e.description = 'Enter description.';
+            e.description = t('parcelForm.errDescription');
         } else if (form.description.trim().length > 100) {
-            e.description = 'No more than 100 characters.';
+            e.description = t('common.errMax', { max: 100 });
         }
 
         if (form.weightKg === '') {
-            e.weightKg = 'Enter weight.';
+            e.weightKg = t('parcelForm.errWeightRequired');
         } else if (Number(form.weightKg) <= 0) {
-            e.weightKg = 'The weight must be greater than zero.';
+            e.weightKg = t('parcelForm.errWeightPositive');
         } else if (!DIMENSION_PATTERN.test(form.weightKg)) {
-            e.weightKg = 'Up to 6 digits before the decimal point and up to 2 after';
+            e.weightKg = t('parcelForm.errDigits6');
         }
 
         const lengthError = validateDimension(form.lengthCm);
@@ -89,11 +91,11 @@ function ParcelForm({ orderId, parcel, onSaved, onCancel }) {
         }
 
         if (form.declaredValue === '') {
-            e.declaredValue = 'Enter declared value.';
+            e.declaredValue = t('parcelForm.errValueRequired');
         } else if (Number(form.declaredValue) < 0) {
-            e.declaredValue = 'The value cannot be negative.';
+            e.declaredValue = t('parcelForm.errValueNegative');
         } else if (!VALUE_PATTERN.test(form.declaredValue)) {
-            e.declaredValue = 'Up to 8 digits before the decimal point and up to 2 after.';
+            e.declaredValue = t('parcelForm.errDigits8');
         }
 
         return e;
@@ -121,10 +123,10 @@ function ParcelForm({ orderId, parcel, onSaved, onCancel }) {
         try {
             if (isEdit) {
                 await updateParcel(parcel.id, payload);
-                toast.success('Parcel updated');
+                toast.success(t('parcelForm.updatedOk'));
             } else {
                 await createParcel(orderId, payload);
-                toast.success('Parcel added');
+                toast.success(t('parcelForm.createdOk'));
             }
             onSaved();
         } catch (err) {
@@ -136,7 +138,7 @@ function ParcelForm({ orderId, parcel, onSaved, onCancel }) {
                 });
                 setErrors(fieldErrors);
             } else {
-                toast.error(getErrorMessage(err, 'Failed to save parcel'));
+                toast.error(getErrorMessage(err, t('parcelForm.saveError')));
             }
         } finally {
             setSaving(false);
@@ -146,29 +148,29 @@ function ParcelForm({ orderId, parcel, onSaved, onCancel }) {
     return (
         <div className="dialog-overlay">
             <div className="dialog dialog-wide">
-                <h2>{isEdit ? 'Edit parcel' : 'New parcel'}</h2>
+                <h2>{isEdit ? t('parcelForm.titleEdit') : t('parcelForm.titleNew')}</h2>
 
                 <form onSubmit={handleSubmit} noValidate>
                     <div className="form-grid">
-                        <FormInput label="Cago description" name="description" value={form.description} onChange={handleChange} error={errors.description} required />
-                        <FormInput label="Weight, kg" name="weightKg" type="number" value={form.weightKg} onChange={handleChange} error={errors.weightKg} required />
-                        <FormInput label="Length, cm" name="lengthCm" type="number" value={form.lengthCm} onChange={handleChange} error={errors.lengthCm} />
-                        <FormInput label="Width, cm" name="widthCm" type="number" value={form.widthCm} onChange={handleChange} error={errors.widthCm} />
-                        <FormInput label="Height, cm" name="heightCm" type="number" value={form.heightCm} onChange={handleChange} error={errors.heightCm} />
-                        <FormInput label="Declared value" name="declaredValue" type="number" value={form.declaredValue} onChange={handleChange} error={errors.declaredValue} required />
+                        <FormInput label={t('parcelForm.description')} name="description" value={form.description} onChange={handleChange} error={errors.description} required />
+                        <FormInput label={t('parcelForm.weight')} name="weightKg" type="number" value={form.weightKg} onChange={handleChange} error={errors.weightKg} required />
+                        <FormInput label={t('parcelForm.length')} name="lengthCm" type="number" value={form.lengthCm} onChange={handleChange} error={errors.lengthCm} />
+                        <FormInput label={t('parcelForm.width')} name="widthCm" type="number" value={form.widthCm} onChange={handleChange} error={errors.widthCm} />
+                        <FormInput label={t('parcelForm.height')} name="heightCm" type="number" value={form.heightCm} onChange={handleChange} error={errors.heightCm} />
+                        <FormInput label={t('parcelForm.value')} name="declaredValue" type="number" value={form.declaredValue} onChange={handleChange} error={errors.declaredValue} required />
                     </div>
 
                     <label className="checkbox-field">
                         <input type="checkbox" name="fragile" checked={form.fragile} onChange={handleChange} />
-                        Fragile parcel
+                        {t('parcelForm.fragile')}
                     </label>
 
                     <div className="dialog-actions">
                         <button type="button" className="btn secondary" onClick={onCancel} disabled={saving}>
-                            Cancel
+                            {t('common.cancel')}
                         </button>
                         <button type="submit" className="btn" disabled={saving}>
-                            {saving ? 'Saving...' : 'Save'}
+                            {saving ? t('common.saving') : t('common.save')}
                         </button>
                     </div>
                 </form>

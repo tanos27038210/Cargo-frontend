@@ -42,7 +42,7 @@ function Layout() {
 
                 <div className="sidebar-user">
                     <div>{user?.fullName}</div>
-                    <div className="role">{user?.role}</div>
+                    <div className="role">{t(`role.${user?.role}`)}</div>
                     <button onClick={handleLogout}>{t('nav.logout')}</button>
                 </div>
             </aside>

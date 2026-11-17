@@ -2,27 +2,30 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getDashboardSummary } from '../api/dashboard';
 import { useAuth } from '../context/AuthContext';
-import { ORDER_STATUS_LABELS } from '../constants/statuses';
+import { useLanguage } from '../context/LanguageContext';
+import { ORDER_STATUSES } from '../constants/statuses';
 import { getErrorMessage } from '../utils/errors';
 import { formatDateTime } from '../utils/format';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
 
-function OrderListCard({ title, orders = [], emptyText, dateColumn }) {
+function OrderListCard({ title, orders, emptyText, dateColumn }) {
+    const { t } = useLanguage();
+
     return (
         <section className="card">
             <h2>{title}</h2>
-            {orders.length === 0 ? (
+            {(orders || []).length === 0 ? (
                 <p className="muted">{emptyText}</p>
             ) : (
                 <div className="table-wrapper">
                     <table className="data-table">
                         <thead>
                         <tr>
-                            <th>Number</th>
-                            <th>Customer</th>
-                            <th>Status</th>
-                            <th>{dateColumn === 'expected' ? 'Expected' : 'Created'}</th>
+                            <th>{t('orders.number')}</th>
+                            <th>{t('orders.customer')}</th>
+                            <th>{t('orders.status')}</th>
+                            <th>{dateColumn === 'expected' ? t('dashboard.expectedWas') : t('common.created')}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -50,6 +53,7 @@ function OrderListCard({ title, orders = [], emptyText, dateColumn }) {
 
 function DashboardPage() {
     const { user } = useAuth();
+    const { t } = useLanguage();
 
     const [summary, setSummary] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -64,7 +68,7 @@ function DashboardPage() {
                 const response = await getDashboardSummary();
                 setSummary(response.data);
             } catch (err) {
-                setError(getErrorMessage(err, 'Failed to load summary'));
+                setError(getErrorMessage(err, t('dashboard.loadError')));
             } finally {
                 setLoading(false);
             }
@@ -75,46 +79,46 @@ function DashboardPage() {
     const total = summary?.totalOrders ?? 0;
 
     return (
-        <div className="dashboard-page">
+        <div>
             <div className="page-header">
-                <h1>Dashboard</h1>
+                <h1>{t('nav.dashboard')}</h1>
                 <span className="muted">
-          {user.role === 'ADMIN' ? 'All company orders' : 'Only your orders'}
+          {user.role === 'ADMIN' ? t('dashboard.scopeAll') : t('dashboard.scopeMine')}
         </span>
                 <button
                     className="btn secondary push-right"
                     onClick={() => setReloadKey((k) => k + 1)}
                     disabled={loading}
                 >
-                    {loading ? 'Loading...' : 'Update'}
+                    {loading ? t('common.loading') : t('common.refresh')}
                 </button>
             </div>
 
             {error && <div className="form-error">{error}</div>}
-            {loading && !summary && <p className="muted">Loading...</p>}
+            {loading && !summary && <p className="muted">{t('common.loading')}</p>}
 
             {summary && (
                 <>
                     <div className="stat-grid">
-                        <StatCard title="Total orders" value={summary.totalOrders} />
-                        <StatCard title="Active" value={summary.activeOrders} tone="blue" />
-                        <StatCard title="Delivered" value={summary.deliveredOrders} tone="green" />
-                        <StatCard title="Cancelled" value={summary.cancelledOrders} tone="red" />
-                        <StatCard title="Overdue" value={summary.overdueOrders} tone="orange" />
+                        <StatCard title={t('dashboard.total')} value={summary.totalOrders} />
+                        <StatCard title={t('dashboard.active')} value={summary.activeOrders} tone="blue" />
+                        <StatCard title={t('dashboard.delivered')} value={summary.deliveredOrders} tone="green" />
+                        <StatCard title={t('dashboard.cancelled')} value={summary.cancelledOrders} tone="red" />
+                        <StatCard title={t('dashboard.overdue')} value={summary.overdueOrders} tone="orange" />
                     </div>
 
                     <section className="card">
-                        <h2>Orders by status</h2>
+                        <h2>{t('dashboard.byStatus')}</h2>
                         {total === 0 ? (
-                            <p className="muted">No orders yet.</p>
+                            <p className="muted">{t('dashboard.noOrders')}</p>
                         ) : (
                             <div className="bar-list">
-                                {Object.keys(ORDER_STATUS_LABELS).map((code) => {
+                                {ORDER_STATUSES.map((code) => {
                                     const count = summary.ordersByStatus?.[code] ?? 0;
                                     const percent = (count / total) * 100;
                                     return (
                                         <div className="bar-row" key={code}>
-                                            <div className="bar-label">{ORDER_STATUS_LABELS[code]}</div>
+                                            <div className="bar-label">{t(`orderStatus.${code}`)}</div>
                                             <div className="bar-track">
                                                 <div className="bar-fill" style={{ width: `${percent}%` }} />
                                             </div>
@@ -128,15 +132,15 @@ function DashboardPage() {
 
                     <div className="two-columns">
                         <OrderListCard
-                            title="Recent orders"
-                            orders={summary.recentOrdersList}
-                            emptyText="No orders yet"
+                            title={t('dashboard.recent')}
+                            orders={summary.recentOrders}
+                            emptyText={t('dashboard.noOrders')}
                             dateColumn="created"
                         />
                         <OrderListCard
-                            title="Overdue orders"
+                            title={t('dashboard.overdueList')}
                             orders={summary.overdueOrderList}
-                            emptyText="No overdue orders"
+                            emptyText={t('dashboard.noOverdue')}
                             dateColumn="expected"
                         />
                     </div>

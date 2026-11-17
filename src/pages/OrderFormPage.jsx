@@ -3,8 +3,9 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getCustomers } from '../api/customers';
 import { createOrder, getOrder, updateOrder } from '../api/orders';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
-import { DELIVERY_TYPE_LABELS } from '../constants/statuses';
+import { DELIVERY_TYPES } from '../constants/statuses';
 import { getErrorMessage } from '../utils/errors';
 import FormInput from '../components/FormInput';
 import FormSelect from '../components/FormSelect';
@@ -22,9 +23,10 @@ const EMPTY_FORM = {
 
 function OrderFormPage() {
     const { id } = useParams();
-    const [searchParams] = useSearchParams();
     const isEdit = Boolean(id);
+    const [searchParams] = useSearchParams();
     const { user } = useAuth();
+    const { t } = useLanguage();
     const toast = useToast();
     const navigate = useNavigate();
 
@@ -46,19 +48,16 @@ function OrderFormPage() {
                 if (isEdit) {
                     const response = await getOrder(id);
                     const o = response.data;
-
                     if (user.role !== 'ADMIN' && o.managerId !== user.id) {
-                        toast.error('You can only modify your own orders.');
+                        toast.error(t('orderForm.ownOnly'));
                         navigate(`/orders/${id}`, { replace: true });
                         return;
                     }
-
                     if (['DELIVERED', 'CANCELLED'].includes(o.status)) {
-                        toast.error('A completed or cancelled order cannot be modified.');
+                        toast.error(t('orderForm.finished'));
                         navigate(`/orders/${id}`, { replace: true });
                         return;
                     }
-
                     setCustomerName(o.customerName);
                     setForm({
                         customerId: String(o.customerId),
@@ -79,7 +78,7 @@ function OrderFormPage() {
                     setCustomers(response.data.content);
                 }
             } catch (err) {
-                toast.error(getErrorMessage(err, 'Failed to load date'));
+                toast.error(getErrorMessage(err, t('orderForm.loadError')));
                 navigate('/orders', { replace: true });
                 return;
             } finally {
@@ -98,41 +97,41 @@ function OrderFormPage() {
         const e = {};
 
         if (!isEdit && !form.customerId) {
-            e.customerId = 'Select a customer';
+            e.customerId = t('orderForm.errCustomer');
         }
 
         if (!form.originAddress.trim()) {
-            e.originAddress = 'Enter the origin address';
+            e.originAddress = t('orderForm.errOrigin');
         } else if (form.originAddress.trim().length > 100) {
-            e.originAddress = 'Maximum 100 characters';
+            e.originAddress = t('common.errMax', { max: 100 });
         }
 
         if (!form.destinationAddress.trim()) {
-            e.destinationAddress = 'Enter the delivery address';
+            e.destinationAddress = t('orderForm.errDestination');
         } else if (form.destinationAddress.trim().length > 100) {
-            e.destinationAddress = 'Maximum 100 characters';
+            e.destinationAddress = t('common.errMax', { max: 100 });
         }
 
         if (!form.deliveryType) {
-            e.deliveryType = 'Enter delivery type';
+            e.deliveryType = t('orderForm.errDelivery');
         }
 
         if (form.price === '') {
-            e.price = 'Enter price';
+            e.price = t('orderForm.errPriceRequired');
         } else if (Number(form.price) < 0) {
-            e.price = 'Price cannot be negative';
+            e.price = t('orderForm.errPriceNegative');
         } else if (!/^\d{1,8}(\.\d{1,2})?$/.test(form.price)) {
-            e.price = 'Up to 8 digits before the decimal point and up to 2 after';
+            e.price = t('orderForm.errPriceFormat');
         }
 
         if (!form.expectedDeliveryDate) {
-            e.expectedDeliveryDate = 'Enter the expected delivery date';
+            e.expectedDeliveryDate = t('orderForm.errDateRequired');
         } else if (!isEdit && form.expectedDeliveryDate < today) {
-            e.expectedDeliveryDate = 'The date cannot be in the past';
+            e.expectedDeliveryDate = t('orderForm.errDatePast');
         }
 
         if (form.notes.trim().length > 250) {
-            e.notes = 'Maximum 250 characters';
+            e.notes = t('common.errMax', { max: 250 });
         }
 
         return e;
@@ -159,11 +158,11 @@ function OrderFormPage() {
         try {
             if (isEdit) {
                 await updateOrder(id, common);
-                toast.success('Order updated');
+                toast.success(t('orderForm.updatedOk'));
                 navigate(`/orders/${id}`);
             } else {
                 const response = await createOrder({ ...common, customerId: Number(form.customerId) });
-                toast.success('Order created');
+                toast.success(t('orderForm.createdOk'));
                 navigate(`/orders/${response.data.id}`);
             }
         } catch (err) {
@@ -175,7 +174,7 @@ function OrderFormPage() {
                 });
                 setErrors(fieldErrors);
             } else {
-                toast.error(getErrorMessage(err, 'Failed to save order'));
+                toast.error(getErrorMessage(err, t('orderForm.saveError')));
             }
         } finally {
             setSaving(false);
@@ -183,7 +182,7 @@ function OrderFormPage() {
     };
 
     if (loading) {
-        return <p>Загрузка...</p>;
+        return <p>{t('common.loading')}</p>;
     }
 
     const customerOptions = customers.map((c) => ({
@@ -191,9 +190,9 @@ function OrderFormPage() {
         label: c.companyName ? `${c.name} (${c.companyName})` : c.name,
     }));
 
-    const deliveryOptions = Object.entries(DELIVERY_TYPE_LABELS).map(([code, label]) => ({
+    const deliveryOptions = DELIVERY_TYPES.map((code) => ({
         value: code,
-        label,
+        label: t(`deliveryType.${code}`),
     }));
 
     const backLink = isEdit ? `/orders/${id}` : '/orders';
@@ -201,53 +200,53 @@ function OrderFormPage() {
     return (
         <div>
             <div className="page-header">
-                <h1>{isEdit ? 'Edit order' : 'New order'}</h1>
+                <h1>{isEdit ? t('orderForm.titleEdit') : t('orderForm.titleNew')}</h1>
             </div>
 
             <form className="entity-form" onSubmit={handleSubmit} noValidate>
                 <div className="form-grid">
                     {isEdit ? (
                         <div className="form-field">
-                            <span>Customer</span>
+                            <span>{t('orderForm.customer')}</span>
                             <div className="readonly-field">{customerName}</div>
                         </div>
                     ) : (
                         <FormSelect
-                            label="Customer"
+                            label={t('orderForm.customer')}
                             name="customerId"
                             value={form.customerId}
                             onChange={handleChange}
                             error={errors.customerId}
                             options={customerOptions}
-                            placeholder="Select customer"
+                            placeholder={t('orderForm.customerPlaceholder')}
                             required
                         />
                     )}
 
                     <FormSelect
-                        label="Delivery type"
+                        label={t('orderForm.deliveryType')}
                         name="deliveryType"
                         value={form.deliveryType}
                         onChange={handleChange}
                         error={errors.deliveryType}
                         options={deliveryOptions}
-                        placeholder="Select a type"
+                        placeholder={t('orderForm.deliveryPlaceholder')}
                         required
                     />
 
-                    <FormInput label="From" name="originAddress" value={form.originAddress} onChange={handleChange} error={errors.originAddress} required />
-                    <FormInput label="To" name="destinationAddress" value={form.destinationAddress} onChange={handleChange} error={errors.destinationAddress} required />
+                    <FormInput label={t('orderForm.origin')} name="originAddress" value={form.originAddress} onChange={handleChange} error={errors.originAddress} required />
+                    <FormInput label={t('orderForm.destination')} name="destinationAddress" value={form.destinationAddress} onChange={handleChange} error={errors.destinationAddress} required />
 
-                    <FormInput label="Price" name="price" type="number" value={form.price} onChange={handleChange} error={errors.price} required />
-                    <FormInput label="Expected delivery date" name="expectedDeliveryDate" type="date" value={form.expectedDeliveryDate} onChange={handleChange} error={errors.expectedDeliveryDate} required />
+                    <FormInput label={t('orderForm.price')} name="price" type="number" value={form.price} onChange={handleChange} error={errors.price} required />
+                    <FormInput label={t('orderForm.expectedDate')} name="expectedDeliveryDate" type="date" value={form.expectedDeliveryDate} onChange={handleChange} error={errors.expectedDeliveryDate} required />
                 </div>
 
-                <FormTextarea label="Notes" name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
+                <FormTextarea label={t('common.notes')} name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
 
                 <div className="form-actions">
-                    <Link to={backLink} className="btn secondary">Отмена</Link>
+                    <Link to={backLink} className="btn secondary">{t('common.cancel')}</Link>
                     <button type="submit" className="btn" disabled={saving}>
-                        {saving ? 'Saving...' : 'Save'}
+                        {saving ? t('common.saving') : t('common.save')}
                     </button>
                 </div>
             </form>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { changeParcelStatus, deleteParcel, getOrderParcels } from '../api/parcels';
+import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { getAllowedParcelStatuses } from '../constants/transitions';
 import { getErrorMessage } from '../utils/errors';
@@ -8,14 +9,8 @@ import ParcelForm from './ParcelForm';
 import StatusBadge from './StatusBadge';
 import StatusChangeDropdown from './StatusChangeDropdown';
 
-const formatSize = (p) => {
-    if (p.lengthCm == null && p.widthCm == null && p.heightCm == null) {
-        return '—';
-    }
-    return `${p.lengthCm ?? '?'} × ${p.widthCm ?? '?'} × ${p.heightCm ?? '?'} см`;
-};
-
 function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
+    const { t } = useLanguage();
     const toast = useToast();
 
     const [parcels, setParcels] = useState([]);
@@ -37,13 +32,20 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
                 const response = await getOrderParcels(orderId);
                 setParcels(response.data);
             } catch (err) {
-                toast.error(getErrorMessage(err, 'Failed to load parcel'));
+                toast.error(getErrorMessage(err, t('parcels.loadError')));
             } finally {
                 setLoading(false);
             }
         };
         load();
     }, [orderId, reloadKey]);
+
+    const formatSize = (p) => {
+        if (p.lengthCm == null && p.widthCm == null && p.heightCm == null) {
+            return '—';
+        }
+        return `${p.lengthCm ?? '?'} × ${p.widthCm ?? '?'} × ${p.heightCm ?? '?'} ${t('parcels.cm')}`;
+    };
 
     const openCreate = () => {
         setEditing(null);
@@ -69,12 +71,12 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
         setStatusLoading(true);
         try {
             await changeParcelStatus(statusParcel.id, { newStatus, comment: comment || null });
-            toast.success('Parcel status updated');
+            toast.success(t('parcels.statusChanged'));
             setStatusParcel(null);
             reload();
             return true;
         } catch (err) {
-            toast.error(getErrorMessage(err, 'Failed to update status'));
+            toast.error(getErrorMessage(err, t('parcels.statusError')));
             return false;
         } finally {
             setStatusLoading(false);
@@ -85,11 +87,11 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
         setDeleteLoading(true);
         try {
             await deleteParcel(deleting.id);
-            toast.success('Parcel deleted');
+            toast.success(t('parcels.deleted'));
             setDeleting(null);
             reload();
         } catch (err) {
-            toast.error(getErrorMessage(err, 'Failed to delete parcel'));
+            toast.error(getErrorMessage(err, t('parcels.deleteError')));
             setDeleting(null);
         } finally {
             setDeleteLoading(false);
@@ -99,17 +101,17 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
     return (
         <section className="card">
             <div className="card-header">
-                <h2>Parcels ({parcels.length})</h2>
+                <h2>{t('parcels.title', { count: parcels.length })}</h2>
                 {canModify && !orderFinished && (
                     <button className="btn" onClick={openCreate}>
-                        Add parcel
+                        {t('parcels.add')}
                     </button>
                 )}
             </div>
 
-            {loading && <p className="muted">Loading...</p>}
+            {loading && <p className="muted">{t('common.loading')}</p>}
             {!loading && parcels.length === 0 && (
-                <p className="muted">There are no parcels in the order yet.</p>
+                <p className="muted">{t('parcels.none')}</p>
             )}
 
             {!loading && parcels.length > 0 && (
@@ -117,13 +119,13 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
                     <table className="data-table">
                         <thead>
                         <tr>
-                            <th>Tracking number</th>
-                            <th>Description</th>
-                            <th>Weight, kg</th>
-                            <th>Size</th>
-                            <th>Value</th>
-                            <th>Fragile</th>
-                            <th>Status</th>
+                            <th>{t('parcels.tracking')}</th>
+                            <th>{t('parcels.description')}</th>
+                            <th>{t('parcels.weight')}</th>
+                            <th>{t('parcels.size')}</th>
+                            <th>{t('parcels.value')}</th>
+                            <th>{t('parcels.fragile')}</th>
+                            <th>{t('parcels.status')}</th>
                             <th></th>
                         </tr>
                         </thead>
@@ -135,23 +137,23 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
                                 <td>{p.weightKg}</td>
                                 <td>{formatSize(p)}</td>
                                 <td>{Number(p.declaredValue).toFixed(2)}</td>
-                                <td>{p.fragile ? 'Yes' : 'No'}</td>
+                                <td>{p.fragile ? t('common.yes') : t('common.no')}</td>
                                 <td><StatusBadge status={p.status} type="parcel" /></td>
                                 <td>
                                     <div className="row-actions">
                                         {canModify && (
                                             <button className="link-action" onClick={() => setStatusParcel(p)}>
-                                                Status
+                                                {t('parcels.status')}
                                             </button>
                                         )}
                                         {canModify && (
                                             <button className="link-action" onClick={() => openEdit(p)}>
-                                                Edit
+                                                {t('common.edit')}
                                             </button>
                                         )}
                                         {isAdmin && (
                                             <button className="link-danger" onClick={() => setDeleting(p)}>
-                                                Delete
+                                                {t('common.delete')}
                                             </button>
                                         )}
                                     </div>
@@ -175,9 +177,9 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
             {statusParcel && (
                 <div className="dialog-overlay" onClick={() => setStatusParcel(null)}>
                     <div className="dialog dialog-wide" onClick={(e) => e.stopPropagation()}>
-                        <h2>Parcel status {statusParcel.trackingNumber}</h2>
+                        <h2>{t('parcels.statusTitle', { tracking: statusParcel.trackingNumber })}</h2>
                         <p>
-                            Currently: <StatusBadge status={statusParcel.status} />
+                            {t('parcels.current')} <StatusBadge status={statusParcel.status} type="parcel" />
                         </p>
                         <StatusChangeDropdown
                             allowedStatuses={getAllowedParcelStatuses(statusParcel.status, isAdmin)}
@@ -187,7 +189,7 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
                         />
                         <div className="dialog-actions">
                             <button className="btn secondary" onClick={() => setStatusParcel(null)}>
-                                Close
+                                {t('common.close')}
                             </button>
                         </div>
                     </div>
@@ -196,7 +198,7 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
 
             <ConfirmDialog
                 open={Boolean(deleting)}
-                message={`Delete parcel ${deleting?.trackingNumber}? This action cannot be undone.`}
+                message={t('parcels.deleteMessage', { tracking: deleting?.trackingNumber ?? '' })}
                 onConfirm={handleDelete}
                 onCancel={() => setDeleting(null)}
                 loading={deleteLoading}

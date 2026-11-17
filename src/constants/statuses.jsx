@@ -28,3 +28,18 @@ export const DELIVERY_TYPE_LABELS = {
 };
 
 export const STATUS_LABELS = { ...ORDER_STATUS_LABELS, ...PARCEL_STATUS_LABELS };
+
+// Списки кодов (без подписей): подписи теперь берутся из словаря перевода по ключу
+export const ORDER_STATUSES = [
+    'DRAFT',
+    'CONFIRMED',
+    'PICKUP_SCHEDULED',
+    'IN_TRANSIT',
+    'AT_WAREHOUSE',
+    'OUT_FOR_DELIVERY',
+    'DELIVERED',
+    'CANCELLED',
+    'RETURNED',
+];
+
+export const DELIVERY_TYPES = ['STANDARD', 'EXPRESS'];

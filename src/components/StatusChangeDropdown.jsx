@@ -1,12 +1,14 @@
-import {useState} from "react";
-import {STATUS_LABELS} from "../constants/statuses.jsx";
+import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
-function StatusChangeDropdown({allowedStatuses, onChange, loading}) {
+function StatusChangeDropdown({ allowedStatuses, onChange, loading, type = 'order' }) {
+    const { t } = useLanguage();
+    // Выбранный статус и комментарий хранит сам компонент
     const [newStatus, setNewStatus] = useState('');
     const [comment, setComment] = useState('');
 
     if (allowedStatuses.length === 0) {
-        return <p className="muted">There are no transitions from this status</p>;
+        return <p className="muted">{t('statusChange.none')}</p>;
     }
 
     const handleSubmit = async (event) => {
@@ -24,19 +26,19 @@ function StatusChangeDropdown({allowedStatuses, onChange, loading}) {
     return (
         <form className="status-form" onSubmit={handleSubmit}>
             <label className="form-field">
-                <span>New status</span>
+                <span>{t('statusChange.newStatus')}</span>
                 <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                    <option value="">Choose status</option>
+                    <option value="">{t('statusChange.choose')}</option>
                     {allowedStatuses.map((code) => (
                         <option key={code} value={code}>
-                            {STATUS_LABELS[code]}
+                            {t(`${type}Status.${code}`)}
                         </option>
                     ))}
                 </select>
             </label>
 
             <label className="form-field">
-                <span>Comment (Not required)</span>
+                <span>{t('statusChange.comment')}</span>
                 <input
                     type="text"
                     maxLength={250}
@@ -46,10 +48,10 @@ function StatusChangeDropdown({allowedStatuses, onChange, loading}) {
             </label>
 
             <button type="submit" className="btn" disabled={!newStatus || loading}>
-                {loading ? 'Saving...' : 'Change status'}
+                {loading ? t('statusChange.saving') : t('statusChange.submit')}
             </button>
         </form>
-    )
+    );
 }
 
 export default StatusChangeDropdown;

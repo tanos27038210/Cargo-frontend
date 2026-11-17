@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
-function SearchBar({ onSearch, placeholder = 'Search...' }) {
+function SearchBar({ onSearch, placeholder }) {
+    const { t } = useLanguage();
     const [text, setText] = useState('');
 
     const handleSubmit = (event) => {
@@ -18,12 +20,12 @@ function SearchBar({ onSearch, placeholder = 'Search...' }) {
             <input
                 type="text"
                 value={text}
-                placeholder={placeholder}
+                placeholder={placeholder ?? t('search.placeholder')}
                 onChange={(e) => setText(e.target.value)}
             />
-            <button type="submit">Find</button>
+            <button type="submit">{t('search.submit')}</button>
             <button type="button" className="secondary" onClick={handleReset}>
-                Reset
+                {t('search.reset')}
             </button>
         </form>
     );

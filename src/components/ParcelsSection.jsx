@@ -136,7 +136,7 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
                                 <td>{formatSize(p)}</td>
                                 <td>{Number(p.declaredValue).toFixed(2)}</td>
                                 <td>{p.fragile ? 'Yes' : 'No'}</td>
-                                <td><StatusBadge status={p.status} /></td>
+                                <td><StatusBadge status={p.status} type="parcel" /></td>
                                 <td>
                                     <div className="row-actions">
                                         {canModify && (
@@ -183,6 +183,7 @@ function ParcelsSection({ orderId, canModify, isAdmin, orderFinished }) {
                             allowedStatuses={getAllowedParcelStatuses(statusParcel.status, isAdmin)}
                             onChange={handleStatusChange}
                             loading={statusLoading}
+                            type="parcel"
                         />
                         <div className="dialog-actions">
                             <button className="btn secondary" onClick={() => setStatusParcel(null)}>

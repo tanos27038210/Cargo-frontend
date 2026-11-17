@@ -1,9 +1,14 @@
-import { STATUS_LABELS } from '../constants/statuses.jsx';
+import { useLanguage } from '../context/LanguageContext';
 
-function StatusBadge({ status }) {
+function StatusBadge({ status, type = 'order' }) {
+    const { t } = useLanguage();
+
+    const key = `${type}Status.${status}`;
+    const text = t(key);
+
     return (
         <span className={`badge badge-${status}`}>
-      {STATUS_LABELS[status] || status}
+      {text === key ? status : text}
     </span>
     );
 }

@@ -1,3 +1,5 @@
+import { useLanguage } from '../context/LanguageContext';
+
 function DataTable({
                        columns,
                        rows,
@@ -8,8 +10,10 @@ function DataTable({
                        page,
                        totalPages,
                        onPageChange,
-                       emptyText = 'No data',
+                       emptyText,
                    }) {
+    const { t } = useLanguage();
+
     return (
         <div>
             <div className="table-wrapper">
@@ -31,12 +35,14 @@ function DataTable({
                     <tbody>
                     {loading && (
                         <tr>
-                            <td colSpan={columns.length} className="table-message">Loading...</td>
+                            <td colSpan={columns.length} className="table-message">{t('table.loading')}</td>
                         </tr>
                     )}
                     {!loading && rows.length === 0 && (
                         <tr>
-                            <td colSpan={columns.length} className="table-message">{emptyText}</td>
+                            <td colSpan={columns.length} className="table-message">
+                                {emptyText ?? t('table.empty')}
+                            </td>
                         </tr>
                     )}
                     {!loading &&
@@ -53,16 +59,16 @@ function DataTable({
 
             <div className="pagination">
                 <button onClick={() => onPageChange(page - 1)} disabled={page === 0 || loading}>
-                    Back
+                    {t('table.back')}
                 </button>
                 <span>
-          Page {page + 1} из {Math.max(totalPages, 1)}
+          {t('table.page', { page: page + 1, total: Math.max(totalPages, 1) })}
         </span>
                 <button
                     onClick={() => onPageChange(page + 1)}
                     disabled={page + 1 >= totalPages || loading}
                 >
-                    Forward
+                    {t('table.next')}
                 </button>
             </div>
         </div>

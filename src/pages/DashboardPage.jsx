@@ -75,7 +75,7 @@ function DashboardPage() {
     const total = summary?.totalOrders ?? 0;
 
     return (
-        <div>
+        <div className="dashboard-page">
             <div className="page-header">
                 <h1>Dashboard</h1>
                 <span className="muted">

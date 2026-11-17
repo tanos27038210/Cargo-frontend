@@ -22,6 +22,10 @@ client.interceptors.response.use(
             window.location.href = '/login';
         }
 
+        if (error.response?.status === 403 && error.method?.config === 'get') {
+            window.location.href = '/access-denied';
+        }
+
         return Promise.reject(error);
     }
 );

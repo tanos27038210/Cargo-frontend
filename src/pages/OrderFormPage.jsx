@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getCustomers } from '../api/customers';
 import { createOrder, getOrder, updateOrder } from '../api/orders';
 import { useAuth } from '../context/AuthContext';
@@ -22,12 +22,16 @@ const EMPTY_FORM = {
 
 function OrderFormPage() {
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
     const isEdit = Boolean(id);
     const { user } = useAuth();
     const toast = useToast();
     const navigate = useNavigate();
 
-    const [form, setForm] = useState(EMPTY_FORM);
+    const [form, setForm] = useState(() => ({
+        ...EMPTY_FORM,
+        customerId: searchParams.get('customerId') || '',
+    }));
     const [errors, setErrors] = useState({});
     const [customers, setCustomers] = useState([]);
     const [customerName, setCustomerName] = useState('');

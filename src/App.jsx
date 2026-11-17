@@ -3,7 +3,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import RoleBasedRoute from './components/RoleBasedRoute';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
-import Placeholder from './pages/Placeholder';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import NotFoundPage from './pages/NotFoundPage';
 import CustomersPage from './pages/CustomersPage';
@@ -14,6 +13,7 @@ import OrderFormPage from './pages/OrderFormPage';
 import DashboardPage from './pages/DashboardPage';
 import UsersPage from './pages/UsersPage';
 import UserFormPage from './pages/UserFormPage';
+import CustomerDetailsPage from './pages/CustomerDetailsPage';
 
 function App() {
     return (
@@ -26,6 +26,7 @@ function App() {
                     <Route path="/customers" element={<CustomersPage />} />
                     <Route path="/customers/new" element={<CustomerFormPage />} />
                     <Route path="/customers/:id/edit" element={<CustomerFormPage />} />
+                    <Route path="/customers/:id" element={<CustomerDetailsPage />} />
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route path="/orders/:id" element={<OrderDetailsPage />} />
                     <Route path="/orders/new" element={<OrderFormPage />} />

@@ -83,7 +83,7 @@ function CustomersPage() {
     };
 
     const columns = [
-        { key: 'name', title: 'Name', sortable: true },
+        { key: 'name', title: 'Name', sortable: true, render: (c) => <Link to={`/customers/${c.id}`}>{c.name}</Link>, },
         { key: 'companyName', title: 'Company', render: (c) => c.companyName || '—' },
         { key: 'phone', title: 'Phone' },
         { key: 'email', title: 'Email', render: (c) => c.email || '—' },

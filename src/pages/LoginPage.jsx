@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 function LoginPage() {
     const { login, isAuthenticated } = useAuth();
+    const { t } = useLanguage();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
@@ -19,12 +22,12 @@ function LoginPage() {
     const validate = () => {
         const newErrors = {};
         if (!email.trim()) {
-            newErrors.email = 'Enter email';
+            newErrors.email = t('login.emailRequired');
         } else if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-            newErrors.email = 'Wrong format email';
+            newErrors.email = t('login.emailInvalid');
         }
         if (!password) {
-            newErrors.password = 'Enter password';
+            newErrors.password = t('login.passwordRequired');
         }
         return newErrors;
     };
@@ -52,7 +55,7 @@ function LoginPage() {
                 });
                 setErrors(fieldErrors);
             } else {
-                setServerError(data?.message || 'Invalid email or password');
+                setServerError(data?.message || t('login.noConnection'));
             }
         } finally {
             setLoading(false);
@@ -61,33 +64,29 @@ function LoginPage() {
 
     return (
         <div className="login-page">
+            <div className="login-lang">
+                <LanguageSwitcher variant="page" />
+            </div>
+
             <form className="login-form" onSubmit={handleSubmit} noValidate>
-                <h1>Cargo CRM</h1>
+                <h1>{t('app.name')}</h1>
 
                 <label>
-                    Email
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
+                    {t('login.email')}
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                     {errors.email && <span className="field-error">{errors.email}</span>}
                 </label>
 
                 <label>
-                    Пароль
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                    {t('login.password')}
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                     {errors.password && <span className="field-error">{errors.password}</span>}
                 </label>
 
                 {serverError && <div className="form-error">{serverError}</div>}
 
                 <button type="submit" disabled={loading}>
-                    {loading ? 'Signing in...' : 'Sign In'}
+                    {loading ? t('login.submitting') : t('login.submit')}
                 </button>
             </form>
         </div>

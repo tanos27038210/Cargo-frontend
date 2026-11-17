@@ -1,11 +1,14 @@
-import {Link} from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 function AccessDeniedPage() {
+    const { t } = useLanguage();
+
     return (
         <div>
-            <h1>Access denied</h1>
-            <p>You do not have permission to access this page</p>
-            <Link to="/">Home</Link>
+            <h1>{t('accessDenied.title')}</h1>
+            <p>{t('accessDenied.text')}</p>
+            <Link to="/">{t('common.home')}</Link>
         </div>
     );
 }

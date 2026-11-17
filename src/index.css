@@ -5,12 +5,12 @@ body {
     color: #1f2933;
 }
 
-/* --- Авторизация --- */
 .login-page {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .login-form {
@@ -71,7 +71,6 @@ body {
     font-size: 14px;
 }
 
-/* --- Основной макет (Layout & Sidebar) --- */
 .layout {
     display: flex;
     min-height: 100vh;
@@ -138,12 +137,11 @@ body {
     cursor: pointer;
 }
 
-/* --- Область контента --- */
 .content {
     flex: 1;
     padding: 24px;
     box-sizing: border-box;
-    min-width: 0; /* Защита от расползания широкими таблицами */
+    min-width: 0;
 }
 
 .page-header {
@@ -162,7 +160,6 @@ body {
     font-size: 14px;
 }
 
-/* --- Поиск, фильтры и таблицы --- */
 .search-bar {
     display: flex;
     gap: 8px;
@@ -252,7 +249,6 @@ body {
     margin-left: auto;
 }
 
-/* --- Кнопки и действия --- */
 .btn {
     display: inline-block;
     padding: 8px 16px;
@@ -312,7 +308,6 @@ body {
     font-size: 14px;
 }
 
-/* --- Формы и карточки --- */
 .entity-form {
     background: #fff;
     padding: 24px;
@@ -427,7 +422,6 @@ body {
     color: #4b5563;
 }
 
-/* --- Фильтры и панели --- */
 .filter-panel {
     background: #fff;
     padding: 16px;
@@ -456,7 +450,6 @@ body {
     font-size: 14px;
 }
 
-/* --- Статусы и бейджи --- */
 .badge {
     display: inline-block;
     padding: 2px 10px;
@@ -490,7 +483,6 @@ body {
     text-decoration: none;
 }
 
-/* --- Диалоги и тосты --- */
 .dialog-overlay {
     position: fixed;
     inset: 0;
@@ -553,7 +545,6 @@ body {
     background: #dc2626;
 }
 
-/* --- Чат / Сообщения --- */
 .message-list {
     max-height: 360px;
     overflow-y: auto;
@@ -622,11 +613,9 @@ body {
     margin-top: 8px;
 }
 
-/* --- Статистика (Dashboard) --- */
 .stat-grid {
     display: grid;
-    minmax(0, 1fr);
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5,  minmax(0, 1fr));
     gap: 16px;
     margin-bottom: 16px;
 }
@@ -727,17 +716,14 @@ body {
     }
 }
 
-/* Верхняя полоса с кнопкой меню: на компьютере скрыта */
 .topbar {
     display: none;
 }
 
-/* Тёмный фон: на компьютере его нет */
 .sidebar-backdrop {
     display: none;
 }
 
-/* Правила для узких экранов (телефон / мобильное меню) */
 @media (max-width: 800px) {
     .layout {
         flex-direction: column;
@@ -804,10 +790,51 @@ body {
     }
 }
 
-/* Дети сетки и карточки могут быть уже своего содержимого:
-   вместо этого широкая таблица прокручивается внутри своего блока */
 .stat-grid > *,
 .two-columns > *,
 .card {
     min-width: 0;
+}
+
+.lang-switcher {
+    display: flex;
+    gap: 4px;
+}
+
+.lang-switcher button {
+    padding: 4px 10px;
+    border: 1px solid #cbd2d9;
+    background: #fff;
+    color: #374151;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.lang-switcher button.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+.lang-sidebar {
+    margin-bottom: 12px;
+}
+
+.lang-sidebar button {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+}
+
+.lang-sidebar button.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+.login-lang {
+    position: absolute;
+    top: 16px;
+    right: 16px;
 }

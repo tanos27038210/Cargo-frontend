@@ -1,16 +1,34 @@
-# React + Vite
+## Фронтенд
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React (Vite) + React Router + Axios.
 
-Currently, two official plugins are available:
+### Запуск
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Запустите бэкенд (порт 8081).
+2. Перейдите в папку фронтенда: `cd cargo-crm-frontend`
+3. Создайте файл `.env`:
+   ```
+   VITE_API_URL=http://localhost:8081/api
+   ```
+4. Установите зависимости и запустите:
+   ```
+   npm install
+   npm run dev
+   ```
+5. Откройте http://localhost:5173 и войдите тестовым пользователем.
 
-## React Compiler
+Адрес фронтенда должен быть в списке `cors.allowed-origins` бэкенда.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Страницы
 
-## Expanding the ESLint configuration
+- Вход, Dashboard (сводка), список клиентов и страница клиента с его заказами
+- Список заказов (поиск, фильтры, сортировка, страницы) и страница заказа:
+  посылки, смена статуса с допустимыми переходами, история статусов, сообщения
+- Управление пользователями (только администратор)
+- Страницы «Не найдено» и «Доступ запрещён», адаптивная вёрстка и мобильное меню
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Дополнительные правила
+
+- Заказ в статусе `DELIVERED` или `CANCELLED` изменять нельзя, добавлять в него посылки тоже
+- Менеджер изменяет и пишет сообщения только в своих заказах, администратор в любых
+- Пользователей не удаляют, а деактивируют; администратор не может отключить себя и сменить себе роль

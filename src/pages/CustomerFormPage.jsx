@@ -148,7 +148,7 @@ function CustomerFormPage() {
                     <FormInput label="Company" name="companyName" value={form.companyName} onChange={handleChange} error={errors.companyName} />
                     <FormInput label="Address" name="address" value={form.address} onChange={handleChange} error={errors.address} />
                 </div>
-                <FormTextarea label="Заметки" name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
+                <FormTextarea label="Notes" name="notes" value={form.notes} onChange={handleChange} error={errors.notes} />
 
                 <div className="form-actions">
                     <Link to="/customers" className="btn secondary">Отмена</Link>

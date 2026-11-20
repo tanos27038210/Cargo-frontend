@@ -281,13 +281,27 @@ body {
 
 .row-actions {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     justify-content: flex-end;
+    align-items: center;
+}
+
+.row-actions > :nth-child(2) {
+    min-width: 130px;
+    text-align: right;
 }
 
 .row-actions a {
     color: #2563eb;
     text-decoration: none;
+}
+
+.row-actions a,
+.link-danger,
+.link-action {
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 .link-danger {

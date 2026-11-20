@@ -1,18 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { DELIVERY_TYPES, ORDER_STATUSES } from '../constants/statuses';
-
-export const EMPTY_FILTERS = {
-    status: '',
-    deliveryType: '',
-    priceMin: '',
-    priceMax: '',
-    expectedFrom: '',
-    expectedTo: '',
-    createdFrom: '',
-    createdTo: '',
-    mine: false,
-};
+import { EMPTY_FILTERS } from '../constants/filters';
 
 function OrderFilterPanel({ onApply }) {
     const { t } = useLanguage();

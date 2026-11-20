@@ -5,9 +5,10 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getErrorMessage } from '../utils/errors';
 import DataTable from '../components/DataTable';
-import OrderFilterPanel, { EMPTY_FILTERS } from '../components/OrderFilterPanel';
 import SearchBar from '../components/SearchBar';
 import StatusBadge from '../components/StatusBadge';
+import OrderFilterPanel from '../components/OrderFilterPanel';
+import { EMPTY_FILTERS } from '../constants/filters';
 
 const PAGE_SIZE = 10;
 const FINISHED = ['DELIVERED', 'CANCELLED'];
